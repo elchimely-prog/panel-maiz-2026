@@ -138,6 +138,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <button class="tab-btn tab-inactive" onclick="switchTab(3,this)">Raya Rancho</button>
   <button class="tab-btn tab-inactive" onclick="switchTab(4,this)">Costo por Ha</button>
   <button class="tab-btn tab-inactive" onclick="switchTab(5,this)">Gastos Indirectos</button>
+  <button class="tab-btn tab-inactive" onclick="switchTab(6,this)">Comparativo Ciclos</button>
 </div>
 
 <!-- ═══════════════ MAIN ═══════════════ -->
@@ -656,6 +657,168 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 </div><!-- /tab5 -->
 
+<!-- ─── TAB 6: COMPARATIVO CICLOS ─── -->
+<div id="tab6" style="display:none;">
+
+  <!-- Nota de alcance -->
+  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;margin-bottom:18px;font-size:12px;color:#92400e;">
+    <strong>Alcance del comparativo:</strong> compara únicamente el programa de fertilización — Convencional 2025 (revaluado a precios 2026) vs. EazyGro 2026 — sobre una base de 71 ha (hectáreas del ciclo 2025). No incluye semilla, herbicidas, insecticidas, mano de obra ni indirectos.
+  </div>
+
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
+    <div class="card kpi-card kpi-red" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Convencional 2025 (precios 2026)</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--red);">$2,107,364</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$29,681/ha · 71 ha</div>
+    </div>
+    <div class="card kpi-card kpi-green" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">EazyGro 2026</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--green);">$1,290,229</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$18,172/ha · base 71 ha</div>
+    </div>
+    <div class="card kpi-card kpi-blue" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ahorro total</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--blue);">$817,135</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$11,509/ha</div>
+    </div>
+    <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Diferencia porcentual</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--purple);">-38.78%</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">EazyGro vs. Convencional</div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
+    <div class="card" style="padding:18px 20px;">
+      <div class="section-heading">Costo total y costo/ha — Convencional 2025 vs. EazyGro 2026</div>
+      <canvas id="chartCompTotales" height="220"></canvas>
+    </div>
+    <div class="card" style="padding:18px 20px;">
+      <div class="section-heading">Composición del costo por programa (MXN)</div>
+      <canvas id="chartCompComposicion" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Tablas lado a lado -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
+    <div class="card" style="overflow:auto;">
+      <div style="padding:14px 18px 4px;">
+        <div class="section-heading" style="color:var(--red);">Convencional 2025 · revaluado a precios 2026</div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Costo</th><th style="text-align:right">$/ha</th></tr></thead>
+        <tbody id="conv2025Tbody"></tbody>
+        <tfoot>
+          <tr class="table-footer">
+            <td style="padding:10px 14px;font-size:12px;">TOTAL</td><td></td>
+            <td class="num" style="padding:10px 14px;">$2,107,364</td>
+            <td class="num" style="padding:10px 14px;">$29,681</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="card" style="overflow:auto;">
+      <div style="padding:14px 18px 4px;">
+        <div class="section-heading" style="color:var(--green);">EazyGro 2026 · programa líquido</div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Costo</th><th style="text-align:right">$/ha</th></tr></thead>
+        <tbody id="eezy2026CompTbody"></tbody>
+        <tfoot>
+          <tr class="table-footer">
+            <td style="padding:10px 14px;font-size:12px;">TOTAL</td><td></td>
+            <td class="num" style="padding:10px 14px;">$1,290,229</td>
+            <td class="num" style="padding:10px 14px;">$18,172</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Conclusión ejecutiva -->
+  <div class="card" style="padding:18px 22px;margin-bottom:24px;">
+    <div class="section-heading">Conclusión ejecutiva</div>
+    <p style="font-size:13px;color:var(--text);line-height:1.6;margin:0;">
+      El programa EazyGro 2026 representa un costo de fertilización <strong style="color:var(--green);">38.78% menor</strong> que repetir el programa convencional 2025 con precios actualizados a 2026. Sobre una base de 71 ha, esto equivale a un ahorro estimado de <strong style="color:var(--blue);">$817,135 MXN</strong>, o <strong style="color:var(--blue);">$11,509 MXN por hectárea</strong>. Los principales productos que más pesaron en el costo convencional 2025 fueron Urea granular ($576,300), YaraVera AMIDAS ($516,000) y Mezcla 18-12-05 ($461,024); en EazyGro 2026, EZ-N21 ($309,260) y Eezy One ($336,388) concentran el mayor costo del programa líquido.
+    </p>
+  </div>
+
+  <!-- ═══ SECCIÓN: GASTOS INDIRECTOS 2025 (MONTICHELY) ═══ -->
+  <div style="border-top:2px solid var(--border2);padding-top:20px;margin-top:8px;">
+    <div style="font-size:15px;font-weight:600;color:var(--text-bright);margin-bottom:4px;">Gastos Indirectos 2025 — Detalle Montichely (Abril a Diciembre)</div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Desglosado por área a partir de los estados de cuenta Banamex/Monex. Excluye pagos a Agrofer (ya contabilizados en su hoja propia), préstamos Elías↔Montichely y ventas/rentas (son ingresos, no gastos).</div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
+      <div class="card kpi-card kpi-red" style="padding:16px 18px;">
+        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Total Indirectos 2025 (Abr-Dic)</div>
+        <div class="mono" style="font-size:19px;font-weight:600;color:var(--red);">$2,381,655</div>
+        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">9 meses · cuenta Montichely</div>
+      </div>
+      <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
+        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Mes con mayor gasto</div>
+        <div class="mono" style="font-size:19px;font-weight:600;color:var(--amber);">$666,589</div>
+        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Diciembre · trilla + mantenimiento</div>
+      </div>
+      <div class="card kpi-card kpi-blue" style="padding:16px 18px;">
+        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Categoría de mayor peso</div>
+        <div class="mono" style="font-size:19px;font-weight:600;color:var(--blue);">$425,155</div>
+        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Combustibles · 17.8% del total</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
+      <div class="card" style="padding:18px 20px;">
+        <div class="section-heading">Por área de gasto (MXN)</div>
+        <canvas id="chartInd2025Categoria" height="240"></canvas>
+      </div>
+      <div class="card" style="padding:18px 20px;">
+        <div class="section-heading">Por mes (MXN)</div>
+        <canvas id="chartInd2025Mensual" height="240"></canvas>
+      </div>
+    </div>
+
+    <!-- Tabla por categoría -->
+    <div class="card" style="overflow:auto;margin-bottom:18px;">
+      <div style="padding:14px 18px 4px;">
+        <div class="section-heading">Detalle por área</div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Área</th><th style="text-align:right">Monto</th><th style="text-align:right">% del total</th></tr></thead>
+        <tbody id="ind2025CatTbody"></tbody>
+        <tfoot>
+          <tr class="table-footer">
+            <td style="padding:10px 14px;font-size:12px;">TOTAL</td>
+            <td class="num" style="padding:10px 14px;">$2,381,655</td>
+            <td class="num" style="padding:10px 14px;">100%</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Tabla por mes -->
+    <div class="card" style="overflow:auto;">
+      <div style="padding:14px 18px 4px;">
+        <div class="section-heading">Detalle por mes</div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Mes</th><th style="text-align:right">Monto</th><th>Nota</th></tr></thead>
+        <tbody id="ind2025MesTbody"></tbody>
+        <tfoot>
+          <tr class="table-footer">
+            <td style="padding:10px 14px;font-size:12px;">TOTAL</td>
+            <td class="num" style="padding:10px 14px;">$2,381,655</td><td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /tab6 -->
+
 </main><!-- /main -->
 
 <!-- ═══ MODAL DE CONFIGURACIÓN ═══ -->
@@ -866,6 +1029,71 @@ const INDIRECTOS = {
   ]
 };
 
+// ── Comparativo Ciclos: Convencional 2025 vs EazyGro 2026 (base 71 ha) ──
+const COMPARATIVO = {
+  ha: 71,
+  convencional2025: [
+    {producto:'Mezcla 18-12-05 + Mic',        cant:'32 ton',      costo:461024,   costoHa:6493.30},
+    {producto:'Urea granular 46-00-00',       cant:'34 ton',      costo:576300,   costoHa:8116.90},
+    {producto:'YaraVera AMIDAS',              cant:'12 ton',      costo:516000,   costoHa:7267.61},
+    {producto:'N-28',                         cant:'9,900 kg/L',  costo:277200,   costoHa:3904.23},
+    {producto:'Sulfato de amonio estándar',   cant:'0.15 ton',    costo:1601,     costoHa:22.54},
+    {producto:'Sulfato de magnesio',          cant:'3.65 ton',    costo:32722,    costoHa:460.88},
+    {producto:'Nitrato de calcio / Calcinit', cant:'5.65 ton',    costo:83055,    costoHa:1169.79},
+    {producto:'NKS / fuente potásica',        cant:'4 ton',       costo:97600,    costoHa:1374.65},
+    {producto:'Ultrasol NKS Plus HG',         cant:'2.525 ton',   costo:61863,    costoHa:871.30},
+  ],
+  eezygro2026: [
+    {producto:'EZ-N21',                       cant:'3,120 L',     costo:309260,   costoHa:4355.78},
+    {producto:'Eezy One',                     cant:'3,120 L',     costo:336388,   costoHa:4737.86},
+    {producto:'Eezy Gro 24K',                 cant:'1,000 L',     costo:165203,   costoHa:2326.80},
+    {producto:'Eezy Gro 9-18-9',              cant:'1,040 L',     costo:144864,   costoHa:2040.34},
+    {producto:'Paquete Nutricional Premium',  cant:'83 pz',       costo:137119,   costoHa:1931.25},
+    {producto:'Eezy Cal',                     cant:'520 L',       costo:85906,    costoHa:1209.94},
+    {producto:'Soil Pro',                     cant:'40 L',        costo:37910,    costoHa:533.94},
+    {producto:'Duo Gold Mix',                 cant:'300 L',       costo:49561,    costoHa:698.04},
+    {producto:'Eezy Gro Fierro',              cant:'29 L',        costo:6492,     costoHa:91.43},
+    {producto:'Eezy Gro Manganeso',           cant:'29 L',        costo:5452,     costoHa:76.78},
+    {producto:'Eezy Fulvic',                  cant:'60 L',        costo:7825,     costoHa:110.22},
+    {producto:'Eezy Gro Magnesio',            cant:'29 L',        costo:3888,     costoHa:54.77},
+    {producto:'Eezy cañ',                     cant:'2 pz',        costo:362,      costoHa:5.09},
+  ]
+};
+
+// ── Gastos Indirectos 2025 (Montichely) — desglosado por área ──
+// Fuente: estados de cuenta Banamex/Monex Abr-Dic 2025. Excluye Agrofer (ya
+// contado en hoja AGROFER), préstamos Elías↔Montichely y ventas/rentas (ingresos).
+const INDIRECTOS_2025 = {
+  porCategoria: [
+    {cat:'Combustibles',                    monto:425155},
+    {cat:'Maquinaria Rentada / Trilla',     monto:399700},
+    {cat:'Nómina y Seguridad Social',       monto:370957},
+    {cat:'Mantenimiento y Refacciones',     monto:306635},
+    {cat:'Tarjetas de Crédito (varios)',    monto:272745},
+    {cat:'Pagos a Sebastián (abono org.)',  monto:173002},
+    {cat:'Agroquímicos / Insumos Varios',   monto:152419},
+    {cat:'Energía (CFE)',                   monto:129909},
+    {cat:'Contabilidad',                    monto:38106},
+    {cat:'Otros / Varios',                  monto:31655},
+    {cat:'Legal / Notarial',                monto:24870},
+    {cat:'Telecomunicaciones',              monto:23292},
+    {cat:'Seguros',                         monto:14466},
+    {cat:'Impuestos (SAT)',                 monto:14196},
+    {cat:'Comisiones Bancarias',            monto:4547},
+  ],
+  porMes: [
+    {mes:'Abril',      monto:443622, nota:null},
+    {mes:'Mayo',       monto:145729, nota:null},
+    {mes:'Junio',      monto:419003, nota:null},
+    {mes:'Julio',      monto:242609, nota:null},
+    {mes:'Agosto',     monto:88862,  nota:null},
+    {mes:'Septiembre', monto:63406,  nota:null},
+    {mes:'Octubre',    monto:0,      nota:'Sin movimientos (cuenta Monex casi inactiva)'},
+    {mes:'Noviembre',  monto:311836, nota:null},
+    {mes:'Diciembre',  monto:666589, nota:null},
+  ]
+};
+
 /* ═══════════════════════════════════════════
    UTILS
 ═══════════════════════════════════════════ */
@@ -882,7 +1110,7 @@ const BADGE_CLASS = {
 ═══════════════════════════════════════════ */
 let activeCharts = {};
 function switchTab(idx, btn) {
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     const el = document.getElementById('tab' + i);
     if (el) el.style.display = i === idx ? 'block' : 'none';
   }
@@ -897,6 +1125,7 @@ function switchTab(idx, btn) {
     if (idx === 3) { renderRayaTable(); initRayaDetalleChart(); }
     if (idx === 4) initCostoHaChart();
     if (idx === 5) { renderIndirectosTable(); initIndirectosCharts(); }
+    if (idx === 6) { renderComparativoTables(); initComparativoCharts(); renderIndirectos2025Tables(); initIndirectos2025Charts(); }
   }, 50);
 }
 
@@ -1550,6 +1779,139 @@ function refreshAllViews() {
   initResumenCharts();
   renderRayaTable();
   renderIndirectosTable();
+}
+
+/* ═══════════════════════════════════════════
+   COMPARATIVO CICLOS — 2025 vs 2026
+═══════════════════════════════════════════ */
+function renderComparativoTables() {
+  const cTbody = document.getElementById('conv2025Tbody');
+  if (cTbody) {
+    cTbody.innerHTML = COMPARATIVO.convencional2025.map(p => `
+      <tr>
+        <td style="font-size:13px;">${p.producto}</td>
+        <td class="num" style="font-size:12px;color:var(--text-dim);">${p.cant}</td>
+        <td class="num" style="font-size:13px;font-weight:600;">${fmt(p.costo)}</td>
+        <td class="num" style="font-size:12px;color:var(--text-dim);">${fmt(p.costoHa)}</td>
+      </tr>`).join('');
+  }
+
+  const eTbody = document.getElementById('eezy2026CompTbody');
+  if (eTbody) {
+    eTbody.innerHTML = COMPARATIVO.eezygro2026.map(p => `
+      <tr>
+        <td style="font-size:13px;">${p.producto}</td>
+        <td class="num" style="font-size:12px;color:var(--text-dim);">${p.cant}</td>
+        <td class="num" style="font-size:13px;font-weight:600;">${fmt(p.costo)}</td>
+        <td class="num" style="font-size:12px;color:var(--text-dim);">${fmt(p.costoHa)}</td>
+      </tr>`).join('');
+  }
+}
+
+function initComparativoCharts() {
+  const TC_DIM = '#7a9485';
+  const TC_GRID = '#d0e4d833';
+
+  // Totales y costo/ha lado a lado
+  makeChart('chartCompTotales', 'bar',
+    ['Costo total (MXN)', 'Costo / ha (MXN)'],
+    [
+      { label: 'Convencional 2025', data: [2107364, 29681], backgroundColor: '#b91c1c33', borderColor: '#b91c1c', borderWidth: 1, borderRadius: 4 },
+      { label: 'EazyGro 2026',      data: [1290229, 18172], backgroundColor: '#15803d33', borderColor: '#15803d', borderWidth: 1, borderRadius: 4 }
+    ],
+    {
+      plugins: { legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } },
+      scales: {
+        x: { ticks: { color: TC_DIM, font: { size: 11 } }, grid: { color: TC_GRID } },
+        y: { type: 'logarithmic', ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+Number(v).toLocaleString('es-MX') }, grid: { color: '#d0e4d844' } }
+      }
+    }
+  );
+
+  // Composición — top 5 de cada programa
+  const top5Conv = [...COMPARATIVO.convencional2025].sort((a,b)=>b.costo-a.costo).slice(0,5);
+  const top5Eezy = [...COMPARATIVO.eezygro2026].sort((a,b)=>b.costo-a.costo).slice(0,5);
+
+  makeChart('chartCompComposicion', 'bar',
+    [...top5Conv.map(p=>p.producto.slice(0,18)), ...top5Eezy.map(p=>p.producto.slice(0,18))],
+    [{
+      label: 'Costo MXN',
+      data: [...top5Conv.map(p=>p.costo), ...top5Eezy.map(p=>p.costo)],
+      backgroundColor: [...top5Conv.map(()=>'#b91c1c33'), ...top5Eezy.map(()=>'#15803d33')],
+      borderColor: [...top5Conv.map(()=>'#b91c1c'), ...top5Eezy.map(()=>'#15803d')],
+      borderWidth: 1, borderRadius: 3, indexAxis: 'y'
+    }],
+    {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: TC_DIM, font:{size:10}, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: TC_GRID } },
+        y: { ticks: { color: '#14291e', font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  );
+}
+
+/* ═══════════════════════════════════════════
+   GASTOS INDIRECTOS 2025 (MONTICHELY)
+═══════════════════════════════════════════ */
+function renderIndirectos2025Tables() {
+  const total2025 = INDIRECTOS_2025.porCategoria.reduce((s,c)=>s+c.monto,0);
+
+  const catTbody = document.getElementById('ind2025CatTbody');
+  if (catTbody) {
+    catTbody.innerHTML = [...INDIRECTOS_2025.porCategoria].sort((a,b)=>b.monto-a.monto).map(c => `
+      <tr>
+        <td style="font-size:13px;">${c.cat}</td>
+        <td class="num" style="font-size:13px;font-weight:600;">${fmt(c.monto)}</td>
+        <td class="num" style="font-size:12px;color:var(--text-dim);">${(c.monto/total2025*100).toFixed(1)}%</td>
+      </tr>`).join('');
+  }
+
+  const mesTbody = document.getElementById('ind2025MesTbody');
+  if (mesTbody) {
+    mesTbody.innerHTML = INDIRECTOS_2025.porMes.map(m => `
+      <tr>
+        <td style="font-size:13px;">${m.mes}</td>
+        <td class="num" style="font-size:13px;font-weight:600;${m.monto===0?'color:var(--text-dim);':''}">${fmt(m.monto)}</td>
+        <td style="font-size:11px;color:${m.nota?'#92400e':'var(--text-dim)'};">${m.nota || ''}</td>
+      </tr>`).join('');
+  }
+}
+
+function initIndirectos2025Charts() {
+  const TC_DIM = '#7a9485';
+  const TC_GRID = '#d0e4d833';
+  const sorted = [...INDIRECTOS_2025.porCategoria].sort((a,b)=>b.monto-a.monto);
+  const palette = ['#b91c1c','#c2410c','#c27a09','#a16207','#65a30d','#15803d','#0e7a70','#0369a1','#1d4ed8','#6d28d9','#a21caf','#be185d','#7a7a7a','#525252','#374151'];
+
+  makeChart('chartInd2025Categoria', 'doughnut',
+    sorted.map(c=>c.cat),
+    [{
+      data: sorted.map(c=>c.monto),
+      backgroundColor: palette.map(c=>c+'55'),
+      borderColor: palette, borderWidth: 1
+    }],
+    { plugins: { legend: { position: 'right', labels: { color: TC_DIM, font: { size: 9 }, boxWidth: 8 } } } }
+  );
+
+  makeChart('chartInd2025Mensual', 'bar',
+    INDIRECTOS_2025.porMes.map(m=>m.mes.slice(0,3)),
+    [{
+      label: 'Gasto mensual MXN',
+      data: INDIRECTOS_2025.porMes.map(m=>m.monto),
+      backgroundColor: INDIRECTOS_2025.porMes.map(m=> m.nota && m.monto>0 ? '#c27a0955' : '#0369a155'),
+      borderColor: INDIRECTOS_2025.porMes.map(m=> m.nota && m.monto>0 ? '#c27a09' : '#0369a1'),
+      borderWidth: 1, borderRadius: 4
+    }],
+    {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: TC_DIM, font: { size: 10 } }, grid: { color: TC_GRID } },
+        y: { ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#d0e4d844' } }
+      }
+    }
+  );
 }
 
 /* ═══════════════════════════════════════════
