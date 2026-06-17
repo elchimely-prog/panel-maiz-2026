@@ -660,10 +660,111 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 <!-- ─── TAB 6: COMPARATIVO CICLOS ─── -->
 <div id="tab6" style="display:none;">
 
-  <!-- Nota de alcance -->
-  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;margin-bottom:18px;font-size:12px;color:#92400e;">
-    <strong>Alcance del comparativo:</strong> compara únicamente el programa de fertilización — Convencional 2025 (revaluado a precios 2026) vs. EazyGro 2026 — sobre una base de 71 ha (hectáreas del ciclo 2025). No incluye semilla, herbicidas, insecticidas, mano de obra ni indirectos.
+  <!-- ═══ SECCIÓN: COMPARATIVO DE COSTO TOTAL — TODOS LOS RUBROS ═══ -->
+  <div style="font-size:15px;font-weight:600;color:var(--text-bright);margin-bottom:4px;">Comparativo de Costo Total — Ciclo 2025 (cerrado) vs. Ciclo 2026</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Incluye Agrofer (semilla, fertilizante, herbicidas, insecticidas, fungicidas y adyuvantes), EazyGro, mano de obra (Raya) y gastos indirectos (Montichely). 2025 es ciclo cerrado y real (71 ha); 2026 muestra real a la fecha y proyección oficial (80 ha).</div>
+
+  <!-- KPIs principales -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;" class="grid-cols-3-r">
+    <div class="card kpi-card kpi-red" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2025 (cerrado)</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--red);">$5,509,690</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$77,601/ha · 71 ha · sin intereses</div>
+    </div>
+    <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2026 (real a la fecha)</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--amber);">$4,037,188</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$50,465/ha · 80 ha · semana 24/52</div>
+    </div>
+    <div class="card kpi-card kpi-green" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2026 (proyectado)</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--green);">$4,311,571</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$53,895/ha · fuente: Global Maíz 26</div>
+    </div>
+    <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Diferencia /ha (2025 vs 2026 proy.)</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--purple);">-30.5%</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">-$23,707/ha</div>
+    </div>
   </div>
+
+  <!-- Alerta tendencia indirectos -->
+  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;margin-bottom:18px;font-size:12px;color:#92400e;">
+    <strong>Atención — tendencia en indirectos:</strong> el promedio mensual de gastos indirectos en 2026 (Abr-Jun) es de $337,806/mes, un 22.4% más alto que el promedio mensual de 2025 ($275,909/mes, Abr-Dic). Si este ritmo se mantiene el resto del ciclo, el costo proyectado de $4,311,571 podría ajustarse al alza. Vale la pena revisar qué está empujando ese incremento — combustibles y tarjetas de crédito fueron las categorías de mayor peso en 2025.
+  </div>
+
+  <!-- Chart comparativo por rubro -->
+  <div class="card" style="padding:18px 20px;margin-bottom:18px;">
+    <div class="section-heading">Costo por rubro — 2025 cerrado vs. 2026 real a la fecha (MXN)</div>
+    <canvas id="chartTotalCiclos" height="200"></canvas>
+  </div>
+
+  <!-- Tabla comparativa por rubro -->
+  <div class="card" style="overflow:auto;margin-bottom:18px;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rubro</th>
+          <th style="text-align:right">2025 cerrado (71 ha)</th>
+          <th style="text-align:right">$/ha 2025</th>
+          <th style="text-align:right">2026 real a la fecha (80 ha)</th>
+          <th style="text-align:right">$/ha 2026 real</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-size:13px;">Agrofer (semilla + fertilizante + agroquímicos)</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$2,471,745</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$34,813</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$1,456,510</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$18,206</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;">EazyGro (fertilización líquida)</td>
+          <td class="num" style="font-size:13px;color:var(--text-dim);">—</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">—</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$1,290,244</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$16,128</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;">Mano de obra (Raya)</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$554,762</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$7,814</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$277,015</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$3,463</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;">Gastos Indirectos (Montichely)</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$2,483,183</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$34,974</td>
+          <td class="num" style="font-size:13px;font-weight:600;">$1,013,419</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$12,668</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;color:var(--text-dim);">Intereses (cuenta Agrofer, solo 2025)</td>
+          <td class="num" style="font-size:13px;color:var(--text-dim);">$52,966</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">$746</td>
+          <td class="num" style="font-size:13px;color:var(--text-dim);">—</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);">—</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="table-footer">
+          <td style="padding:10px 14px;font-size:12px;">TOTAL (sin intereses)</td>
+          <td class="num" style="padding:10px 14px;">$5,509,690</td>
+          <td class="num" style="padding:10px 14px;color:var(--red);">$77,601</td>
+          <td class="num" style="padding:10px 14px;">$4,037,188</td>
+          <td class="num" style="padding:10px 14px;color:var(--amber);">$50,465</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <hr style="border:none;border-top:2px solid var(--border2);margin:24px 0;">
+
+  <!-- ═══ SECCIÓN: DETALLE FERTILIZACIÓN ═══ -->
+  <div style="font-size:15px;font-weight:600;color:var(--text-bright);margin-bottom:4px;">Detalle: Programa de Fertilización</div>
+  <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Convencional 2025 (revaluado a precios 2026) vs. EazyGro 2026, base 71 ha — el rubro de mayor ahorro dentro del comparativo total.</div>
 
   <!-- KPIs -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
@@ -741,7 +842,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div class="card" style="padding:18px 22px;margin-bottom:24px;">
     <div class="section-heading">Conclusión ejecutiva</div>
     <p style="font-size:13px;color:var(--text);line-height:1.6;margin:0;">
-      El programa EazyGro 2026 representa un costo de fertilización <strong style="color:var(--green);">38.78% menor</strong> que repetir el programa convencional 2025 con precios actualizados a 2026. Sobre una base de 71 ha, esto equivale a un ahorro estimado de <strong style="color:var(--blue);">$817,135 MXN</strong>, o <strong style="color:var(--blue);">$11,509 MXN por hectárea</strong>. Los principales productos que más pesaron en el costo convencional 2025 fueron Urea granular ($576,300), YaraVera AMIDAS ($516,000) y Mezcla 18-12-05 ($461,024); en EazyGro 2026, EZ-N21 ($309,260) y Eezy One ($336,388) concentran el mayor costo del programa líquido.
+      Comparando todos los rubros del ciclo, 2025 cerró en <strong style="color:var(--red);">$77,601/ha</strong> (71 ha, cifras reales y cerradas), mientras que 2026 proyecta <strong style="color:var(--green);">$53,895/ha</strong> (80 ha, según Global Maíz 26) — una reducción del <strong style="color:var(--purple);">30.5%</strong>. El motor principal de ese ahorro es la fertilización: EazyGro cuesta <strong style="color:var(--green);">38.78% menos</strong> que repetir el programa convencional 2025 a precios 2026 ($817,135 MXN de ahorro sobre 71 ha). Sin embargo, los gastos indirectos están corriendo <strong style="color:var(--red);">22.4% más altos por mes</strong> en 2026 que en 2025 — si esa tendencia no se controla, podría erosionar parte del ahorro logrado en fertilización antes de que cierre el ciclo.
     </p>
   </div>
 
@@ -1811,6 +1912,22 @@ function renderComparativoTables() {
 function initComparativoCharts() {
   const TC_DIM = '#7a9485';
   const TC_GRID = '#d0e4d833';
+
+  // Comparativo de costo total por rubro — 2025 cerrado vs 2026 real a la fecha
+  makeChart('chartTotalCiclos', 'bar',
+    ['Agrofer', 'EazyGro', 'Mano de obra (Raya)', 'Indirectos'],
+    [
+      { label: '2025 cerrado (71 ha)',        data: [2471745, 0, 554762, 2483183], backgroundColor: '#b91c1c33', borderColor: '#b91c1c', borderWidth: 1, borderRadius: 4 },
+      { label: '2026 real a la fecha (80 ha)', data: [1456510, 1290244, 277015, 1013419], backgroundColor: '#c27a0933', borderColor: '#c27a09', borderWidth: 1, borderRadius: 4 }
+    ],
+    {
+      plugins: { legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } },
+      scales: {
+        x: { ticks: { color: TC_DIM, font: { size: 11 } }, grid: { color: TC_GRID } },
+        y: { ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#d0e4d844' } }
+      }
+    }
+  );
 
   // Totales y costo/ha lado a lado
   makeChart('chartCompTotales', 'bar',
