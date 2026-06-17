@@ -479,10 +479,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
             <td class="num" style="color:var(--amber);">$7,892</td>
           </tr>
           <tr style="border-top:1px solid var(--border2);">
-            <td style="font-size:13px;color:var(--blue);">Gastos Indirectos (Montichely + Sebastián + Elías + Efectivo)</td>
+            <td style="font-size:13px;color:var(--blue);">Gastos Indirectos (Operativos + Administrativos)</td>
             <td class="num" style="color:var(--blue);">$1,047,838</td>
-            <td class="num" style="color:var(--blue);">$1,413,419</td>
-            <td class="num" style="color:var(--blue);">$17,668</td>
+            <td class="num" style="color:var(--blue);">$1,447,838</td>
+            <td class="num" style="color:var(--blue);">$18,098</td>
           </tr>
         </tbody>
         <tfoot>
@@ -564,17 +564,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Indirectos reales (Abr–Jun)</div>
       <div class="mono" style="font-size:20px;font-weight:600;color:var(--amber);">$1,047,838</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Montichely + Sebastián + Elías + Efectivo</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Operativo + Administrativo</div>
     </div>
     <div class="card kpi-card kpi-green" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Total registrado (Global)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--green);">$1,413,419</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Sebastián ciclo completo + registrados</div>
+      <div class="mono" style="font-size:20px;font-weight:600;color:var(--green);">$1,447,838</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Operativo proyectado + Administrativo real</div>
     </div>
     <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Indirectos / ha (80 ha)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--purple);">$17,668</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Real: $13,098/ha · 33% del costo total</div>
+      <div class="mono" style="font-size:20px;font-weight:600;color:var(--purple);">$18,098</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Real: $13,098/ha · 34% del costo total</div>
     </div>
   </div>
 
@@ -582,22 +582,22 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div class="card" style="padding:14px 18px;margin-bottom:18px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
       <span style="font-size:13px;font-weight:500;">Indirectos reales vs. registrado en Global</span>
-      <span class="mono" style="font-size:15px;font-weight:600;color:var(--amber);">74.1%</span>
+      <span class="mono" style="font-size:15px;font-weight:600;color:var(--amber);">72.4%</span>
     </div>
     <div style="background:var(--border);border-radius:5px;height:10px;overflow:hidden;">
-      <div style="width:74.1%;height:100%;background:linear-gradient(90deg,var(--amber),var(--amber2));border-radius:5px;"></div>
+      <div style="width:72.4%;height:100%;background:linear-gradient(90deg,var(--amber),var(--amber2));border-radius:5px;"></div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;">
       <span style="color:var(--amber);">Real Abr–Jun: $1,047,838</span>
-      <span style="color:var(--text-dim);">Pendiente: $365,581 (Sebastián Jul–Nov + otros)</span>
-      <span style="color:var(--green);">Global total: $1,413,419</span>
+      <span style="color:var(--text-dim);">Pendiente: $400,000 (Operativo proyectado Jul–Nov)</span>
+      <span style="color:var(--green);">Global total: $1,447,838</span>
     </div>
   </div>
 
   <!-- Charts -->
   <div style="display:grid;grid-template-columns:1.4fr 0.6fr;gap:16px;margin-bottom:16px;" class="grid-cols-2-r">
     <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Gastos indirectos por mes y fuente (MXN)</div>
+      <div class="section-heading">Gastos indirectos por mes — Operativo, Administrativo y Gastos Indirectos (MXN)</div>
       <canvas id="chartIndMensual" height="220"></canvas>
     </div>
     <div class="card" style="padding:18px 20px;">
@@ -609,16 +609,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <!-- Monthly summary table -->
   <div class="card" style="overflow:auto;margin-bottom:16px;">
     <div style="padding:14px 18px 4px;">
-      <div class="section-heading">Resumen mensual por fuente · Origen: Global Maíz 26.xlsx (Google Drive)</div>
+      <div class="section-heading">Resumen mensual — Operativo vs. Administrativo · Origen: Global Maíz 26.xlsx (Google Drive)</div>
     </div>
     <table class="data-table">
       <thead>
         <tr>
           <th>Mes</th>
-          <th style="text-align:right">Montichely<br><span style="font-size:10px;color:#2d5e42;">Cta. Banamex</span></th>
-          <th style="text-align:right">Sebastián<br><span style="font-size:10px;color:#2d5e42;">Honorarios</span></th>
-          <th style="text-align:right">Elías<br><span style="font-size:10px;color:#2d5e42;">Honorarios</span></th>
-          <th style="text-align:right">Efectivo<br><span style="font-size:10px;color:#2d5e42;">Pagos directo</span></th>
+          <th style="text-align:right">Operativo<br><span style="font-size:10px;color:#2d5e42;">Honorarios de campo</span></th>
+          <th style="text-align:right">Administrativo<br><span style="font-size:10px;color:#2d5e42;">Honorarios de gestión</span></th>
+          <th style="text-align:right">Gastos Indirectos<br><span style="font-size:10px;color:#2d5e42;">Cta. Banamex + Efectivo</span></th>
           <th style="text-align:right">Total mes</th>
           <th>Estado</th>
         </tr>
@@ -627,11 +626,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       <tfoot>
         <tr class="table-footer">
           <td style="padding:10px 14px;font-size:12px;">TOTAL REGISTRADO</td>
-          <td class="num" style="padding:10px 14px;">$430,909</td>
           <td class="num" style="padding:10px 14px;">$654,000</td>
           <td class="num" style="padding:10px 14px;">$271,977</td>
-          <td class="num" style="padding:10px 14px;">$56,533</td>
-          <td class="num" style="padding:10px 14px;color:var(--amber);font-size:14px;">$1,413,419</td>
+          <td class="num" style="padding:10px 14px;">$521,862</td>
+          <td class="num" style="padding:10px 14px;color:var(--amber);font-size:14px;">$1,447,838</td>
           <td></td>
         </tr>
       </tfoot>
@@ -1099,6 +1097,11 @@ const RAYA = [
 ];
 
 const INDIRECTOS = {
+  // Clasificación para la UI (sin nombres de personas en gráficas/tablas):
+  //   OPERATIVO       = montichely (cta. Banamex, gastos de campo) + sebastian (honorarios de campo) + efectivo (pagos directos de campo)
+  //   ADMINISTRATIVO  = elias (honorarios de gestión/administración)
+  // Los arrays conservan su nombre interno solo para trazabilidad de la fuente.
+  //
   // Montichely (Banamex): cifras operativas limpias — excluyen Agrofer (ya
   // contado aparte), compra del vehículo BYD Shark (activo, no operativo) y
   // movimientos de trigo (sales/trilla — cultivo distinto, no maíz).
@@ -1177,7 +1180,7 @@ const INDIRECTOS_2025 = {
     {cat:'Nómina y Seguridad Social',       monto:370957},
     {cat:'Tarjetas de Crédito (varios)',    monto:332513},
     {cat:'Mantenimiento y Refacciones',     monto:311061},
-    {cat:'Pagos a Sebastián (abono org.)',  monto:173002},
+    {cat:'Abono Orgánico (servicio externo)', monto:173002},
     {cat:'Agroquímicos / Insumos Varios',   monto:152419},
     {cat:'Energía (CFE)',                   monto:131079},
     {cat:'Contabilidad',                    monto:42340},
@@ -1618,7 +1621,7 @@ function showStatus(msg, ok) {
    GASTOS INDIRECTOS
 ═══════════════════════════════════════════ */
 function renderIndirectosTable() {
-  // Monthly summary table
+  // Monthly summary table — Operativo (=Sebastián) | Administrativo (=Elías) | Gastos Indirectos (=Montichely+Efectivo)
   const allMonths = ['Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre'];
   const tbody = document.getElementById('indMensualTbody');
   if (!tbody) return;
@@ -1626,18 +1629,19 @@ function renderIndirectosTable() {
   const getMonto = (arr, mes) => (arr.find(r=>r.mes===mes)||{monto:0}).monto;
   const isReal   = (arr, mes) => !!arr.find(r=>r.mes===mes && r.real);
 
-  // EFECTIVO: split across months by date
+  // Pagos directos: split across months by date
   const efAbr = INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-04')).reduce((s,e)=>s+e.monto,0);
   const efMay = INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-05')).reduce((s,e)=>s+e.monto,0);
   const efJun = INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-06')).reduce((s,e)=>s+e.monto,0);
   const efByMes = {Abril:efAbr,Mayo:efMay,Junio:efJun};
 
   tbody.innerHTML = allMonths.map(mes => {
+    const operativo = getMonto(INDIRECTOS.sebastian, mes);
+    const administrativo = getMonto(INDIRECTOS.elias, mes);
     const m = getMonto(INDIRECTOS.montichely, mes);
-    const s = getMonto(INDIRECTOS.sebastian, mes);
-    const e = getMonto(INDIRECTOS.elias, mes);
     const ef = efByMes[mes]||0;
-    const total = m + s + e + ef;
+    const gastosIndirectos = m + ef;
+    const total = operativo + administrativo + gastosIndirectos;
     if (total === 0) return '';
 
     // Determine if real or projected
@@ -1647,10 +1651,9 @@ function renderIndirectosTable() {
 
     return `<tr>
       <td style="font-size:13px;font-weight:500;">${mes}</td>
-      <td class="num" style="font-size:13px;color:${m?'var(--text-bright)':'var(--text-dim)'};">${m?fmt(m):'—'}</td>
-      <td class="num" style="font-size:13px;color:${s?'var(--blue)':'var(--text-dim)'};">${s?fmt(s):'—'}</td>
-      <td class="num" style="font-size:13px;color:${e?'var(--lime)':'var(--text-dim)'};">${e?fmt(e):'—'}</td>
-      <td class="num" style="font-size:13px;color:${ef?'var(--purple)':'var(--text-dim)'};">${ef?fmt(ef):'—'}</td>
+      <td class="num" style="font-size:13px;color:${operativo?'var(--blue)':'var(--text-dim)'};">${operativo?fmt(operativo):'—'}</td>
+      <td class="num" style="font-size:13px;color:${administrativo?'var(--lime)':'var(--text-dim)'};">${administrativo?fmt(administrativo):'—'}</td>
+      <td class="num" style="font-size:13px;color:${gastosIndirectos?'var(--text-bright)':'var(--text-dim)'};">${gastosIndirectos?fmt(gastosIndirectos):'—'}</td>
       <td class="num" style="font-size:14px;font-weight:600;color:var(--amber);">${fmt(total)}</td>
       <td>${badge}</td>
     </tr>`;
@@ -1684,17 +1687,18 @@ function initIndirectosCharts() {
   const allMonths = ['Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre'];
   const getMonto = (arr, mes) => (arr.find(r=>r.mes===mes)||{monto:0}).monto;
 
-  const dMontichely = allMonths.map(m => getMonto(INDIRECTOS.montichely, m));
-  const dSebastian  = allMonths.map(m => getMonto(INDIRECTOS.sebastian, m));
-  const dElias      = allMonths.map(m => getMonto(INDIRECTOS.elias, m));
-  const dEfectivo   = allMonths.map(m => efByMes[m]||0);
+  // Operativo = honorarios de campo (antes "Sebastián")
+  // Administrativo = honorarios de gestión (antes "Elías")
+  // Gastos Indirectos = cuenta Montichely (Banamex) + pagos directos en efectivo
+  const dOperativo        = allMonths.map(m => getMonto(INDIRECTOS.sebastian, m));
+  const dAdministrativo   = allMonths.map(m => getMonto(INDIRECTOS.elias, m));
+  const dGastosIndirectos = allMonths.map(m => getMonto(INDIRECTOS.montichely, m) + (efByMes[m]||0));
 
   makeChart('chartIndMensual','bar', meses,
     [
-      {label:'Montichely Banamex', data:dMontichely, backgroundColor:'#c27a0933', borderColor:'#c27a09', borderWidth:1, borderRadius:3},
-      {label:'Sebastián',          data:dSebastian,  backgroundColor:'#0369a133', borderColor:'#0369a1', borderWidth:1, borderRadius:3},
-      {label:'Elías',              data:dElias,      backgroundColor:'#4d7c0f33', borderColor:'#4d7c0f', borderWidth:1, borderRadius:3},
-      {label:'Efectivo',           data:dEfectivo,   backgroundColor:'#6d28d933', borderColor:'#6d28d9', borderWidth:1, borderRadius:3},
+      {label:'Operativo',         data:dOperativo,        backgroundColor:'#0369a133', borderColor:'#0369a1', borderWidth:1, borderRadius:3},
+      {label:'Administrativo',    data:dAdministrativo,   backgroundColor:'#4d7c0f33', borderColor:'#4d7c0f', borderWidth:1, borderRadius:3},
+      {label:'Gastos Indirectos', data:dGastosIndirectos, backgroundColor:'#c27a0933', borderColor:'#c27a09', borderWidth:1, borderRadius:3},
     ],
     {
       plugins:{legend:{labels:{color:'#7a9485',font:{size:11},boxWidth:10}}},
@@ -1705,10 +1709,15 @@ function initIndirectosCharts() {
     }
   );
 
+  // Totales dinámicos (evita valores fijos desactualizados)
+  const montichelyTotal = INDIRECTOS.montichely.reduce((s,r)=>s+r.monto,0);
+  const sebastianTotal  = INDIRECTOS.sebastian.reduce((s,r)=>s+r.monto,0);
+  const eliasTotal       = INDIRECTOS.elias.reduce((s,r)=>s+r.monto,0);
+
   makeChart('chartIndCategoria','doughnut',
-    ['Honorarios Sebastián','Honorarios Elías','Gastos Banamex','Mant. Maquinaria','Maquinaria Rentada','Energía','Varios'],
+    ['Operativo','Administrativo','Gastos Indirectos (Banamex)','Mant. Maquinaria','Maquinaria Rentada','Energía','Varios'],
     [{
-      data:[654000, 271977, 430909,
+      data:[sebastianTotal, eliasTotal, montichelyTotal,
         INDIRECTOS.efectivo.filter(e=>e.cat==='Mant. Maquinaria').reduce((s,e)=>s+e.monto,0),
         INDIRECTOS.efectivo.filter(e=>e.cat==='Maquinaria Rentada').reduce((s,e)=>s+e.monto,0),
         INDIRECTOS.efectivo.filter(e=>e.cat==='Energía').reduce((s,e)=>s+e.monto,0),
