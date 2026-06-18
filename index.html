@@ -109,7 +109,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     </div>
     <div>
       <div style="color:var(--text-bright);font-size:13px;font-weight:600;letter-spacing:.02em;">Sociedad Agrícola Montichely</div>
-      <div style="color:var(--text-dim);font-size:11px;">Ciclo Maíz 2026 &middot; Abasolo, Gto. &middot; 83 ha &middot; Meta 18 t/ha</div>
+      <div style="color:var(--text-dim);font-size:11px;">Ciclo Maíz 2026 &middot; Abasolo, Gto. &middot; <input id="haInput" type="number" min="1" step="0.5" value="80" onchange="updateHA(this.value)" title="Hectáreas sembradas -- editable" style="width:50px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 4px;font-size:11px;color:var(--text);text-align:right;font-family:inherit;"> ha &middot; Meta 18 t/ha</div>
     </div>
   </div>
   <div class="flex items-center gap-3">
@@ -151,7 +151,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;" class="grid-cols-3-r">
     <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Total Facturas Agrofer</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--amber);">$<span id="kpi-agrofer">1,456,510</span></div>
+      <div class="mono" style="font-size:22px;font-weight:600;color:var(--amber);">$<span id="kpi-agrofer">1,511,477</span></div>
       <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">Abr–Jun 2026 · Julio Santillán</div>
     </div>
     <div class="card kpi-card kpi-green" style="padding:16px 18px;">
@@ -166,18 +166,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     </div>
     <div class="card kpi-card kpi-blue" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Total Real (directos + indirectos)</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--blue);">$4,071,607</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">Directos $3,023,769 + Indirectos $1,047,838</div>
+      <div class="mono" style="font-size:22px;font-weight:600;color:var(--blue);" id="kpiTotalReal">$4,126,574</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;" id="kpiTotalRealNote">Directos $3,078,736 + Indirectos $1,047,838</div>
     </div>
     <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Costo/Ha (Global · 80 ha)</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--purple);">$53,895</div>
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Costo/Ha (Global · <span id="haLabel1">80</span> ha)</div>
+      <div class="mono" style="font-size:22px;font-weight:600;color:var(--purple);" id="kpiCostoHaValue">$53,895</div>
       <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">Total ciclo $4,311,571 · Fuente: Global Maíz 26</div>
     </div>
     <div class="card kpi-card kpi-red" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Costo Estimado / Tonelada</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--red);">$2,994</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">A 18 t/ha · 1,440 t totales · 80 ha</div>
+      <div class="mono" style="font-size:22px;font-weight:600;color:var(--red);" id="kpiCostoTonValue">$2,994</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">A 18 t/ha · <span id="kpiTotalT">1,440</span> t totales · <span id="haLabel2">80</span> ha</div>
     </div>
   </div>
 
@@ -185,20 +185,20 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:10px;padding:16px 22px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:4px;">Total gastado hasta el momento</div>
-      <div style="font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#14291e;" id="totalGastadoBanner">$4,071,607</div>
-      <div style="font-size:12px;color:#5a7a66;margin-top:3px;">Agrofer $1,456,510 · EazyGro $1,290,244 · Raya $277,015 · Indirectos $1,047,838</div>
+      <div style="font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#14291e;" id="totalGastadoBanner">$4,126,574</div>
+      <div style="font-size:12px;color:#5a7a66;margin-top:3px;" id="totalGastadoBannerNote">Agrofer $1,511,477 · EazyGro $1,290,244 · Raya $277,015 · Indirectos $1,047,838</div>
     </div>
     <div style="display:flex;gap:24px;flex-wrap:wrap;">
       <div style="text-align:center;">
         <div style="font-size:11px;color:#5a7a66;margin-bottom:2px;">Del ciclo total</div>
-        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#c27a09;">94.4%</div>
+        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#c27a09;" id="bannerPct">94.4%</div>
         <div style="font-size:11px;color:#5a7a66;">$4,311,571 proyectado</div>
       </div>
       <div style="width:1px;background:#86efac;"></div>
       <div style="text-align:center;">
         <div style="font-size:11px;color:#5a7a66;margin-bottom:2px;">Gastado / Ha</div>
-        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#0369a1;">$50,895</div>
-        <div style="font-size:11px;color:#5a7a66;">de $53,895 estimado</div>
+        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#0369a1;" id="bannerGastadoHa">$50,895</div>
+        <div style="font-size:11px;color:#5a7a66;" id="bannerGastadoHaNote">de $53,895 estimado</div>
       </div>
       <div style="width:1px;background:#86efac;"></div>
       <div style="text-align:center;">
@@ -216,10 +216,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       <div>
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:12px;color:var(--text-dim);">Agrofer vs. presupuesto estimado</span>
-          <span class="mono" style="font-size:12px;color:var(--amber);">77%</span>
+          <span class="mono" style="font-size:12px;color:var(--amber);" id="agroferProgPct">77%</span>
         </div>
-        <div class="prog-track"><div class="prog-fill" style="width:77%;background:var(--amber);"></div></div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">$1,456,510 / ~$1,900,000 est.</div>
+        <div class="prog-track"><div class="prog-fill" id="agroferProgFill" style="width:77%;background:var(--amber);"></div></div>
+        <div style="color:var(--text-dim);font-size:11px;margin-top:4px;" id="agroferProgNote">$1,456,510 / ~$1,900,000 est.</div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
@@ -324,9 +324,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       <div class="mono" style="font-size:14px;color:var(--text-dim);margin-top:2px;">MXN $1,290,244</div>
     </div>
     <div class="card" style="padding:16px 18px;border-top:2px solid var(--amber);">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Programa completo (83 ha)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--amber);">USD $105,901</div>
-      <div class="mono" style="font-size:14px;color:var(--text-dim);margin-top:2px;">MXN $1,841,610</div>
+      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Programa completo (<span id="haLabel3">83</span> ha)</div>
+      <div class="mono" style="font-size:20px;font-weight:600;color:var(--amber);" id="kpiProgramaUsd">USD $105,901</div>
+      <div class="mono" style="font-size:14px;color:var(--text-dim);margin-top:2px;" id="kpiProgramaMxn">MXN $1,841,610</div>
     </div>
     <div class="card" style="padding:16px 18px;border-top:2px solid var(--blue);">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Costo programa / ha</div>
@@ -363,8 +363,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
           <th style="text-align:right">Precio USD/L</th>
           <th style="text-align:right">USD/ha</th>
           <th style="text-align:right">MXN/ha</th>
-          <th style="text-align:right">Total 83 ha USD</th>
-          <th style="text-align:right">Total 83 ha MXN</th>
+          <th style="text-align:right" id="thHaUsd">Total 83 ha USD</th>
+          <th style="text-align:right" id="thHaMxn">Total 83 ha MXN</th>
         </tr>
       </thead>
       <tbody id="eezygroTbody"></tbody>
@@ -382,7 +382,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
   <!-- EazyGro chart -->
   <div class="card" style="padding:18px 20px;">
-    <div class="section-heading">Costo por producto – programa completo 83 ha (MXN)</div>
+    <div class="section-heading" id="chartEezyGroTitle">Costo por producto – programa completo 83 ha (MXN)</div>
     <canvas id="chartEezyGro" height="180"></canvas>
   </div>
 </div><!-- /tab2 -->
@@ -488,9 +488,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
         <tfoot>
           <tr class="table-footer">
             <td style="padding:10px 14px;font-size:12px;">TOTAL</td>
-            <td class="num" style="padding:10px 14px;color:var(--green);">$4,071,607</td>
+            <td class="num" style="padding:10px 14px;color:var(--green);" id="costoHaFooterReal">$4,071,607</td>
             <td class="num" style="padding:10px 14px;">$4,311,571</td>
-            <td class="num" style="padding:10px 14px;color:var(--amber);">$53,895 <span style="font-size:10px;font-weight:400;">/ha (80 ha)</span></td>
+            <td class="num" style="padding:10px 14px;color:var(--amber);"><span id="costoHaFooterHaValue">$53,895</span> <span style="font-size:10px;font-weight:400;">/ha (<span id="haLabel4">80</span> ha)</span></td>
           </tr>
         </tfoot>
       </table>
@@ -533,13 +533,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;" class="grid-cols-2-r">
       <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
         <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Producción estimada</div>
-        <div class="mono" style="font-size:17px;color:var(--green);font-weight:600;">1,440 t</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">80 ha × 18 t/ha</div>
+        <div class="mono" style="font-size:17px;color:var(--green);font-weight:600;" id="beTotalT">1,440 t</div>
+        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;"><span id="haLabel5">80</span> ha × 18 t/ha</div>
       </div>
       <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
         <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Costo / tonelada</div>
-        <div class="mono" style="font-size:17px;color:var(--red);font-weight:600;">$2,597/t</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$4,311,571 / 1,660 t (con indirectos)</div>
+        <div class="mono" style="font-size:17px;color:var(--red);font-weight:600;" id="beCostoTon">$2,994/t</div>
+        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="beCostoTonNote">$4,311,571 / 1,440 t (con indirectos)</div>
       </div>
       <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
         <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Precio mínimo p/e</div>
@@ -671,18 +671,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     </div>
     <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2026 (real a la fecha)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--amber);">$4,071,607</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$50,895/ha · 80 ha · semana 24/52</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--amber);" id="compRealValue">$4,071,607</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="compRealHaNote">$50,895/ha · <span id="haLabel6">80</span> ha · semana 24/52</div>
     </div>
     <div class="card kpi-card kpi-green" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2026 (proyectado)</div>
       <div class="mono" style="font-size:19px;font-weight:600;color:var(--green);">$4,311,571</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$53,895/ha · fuente: Global Maíz 26</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="compProyHaNote">$53,895/ha · fuente: Global Maíz 26</div>
     </div>
     <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
       <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Diferencia /ha (2025 vs 2026 proy.)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--purple);">-30.5%</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">-$23,707/ha</div>
+      <div class="mono" style="font-size:19px;font-weight:600;color:var(--purple);" id="compDiffPct">-30.5%</div>
+      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="compDiffHa">-$23,707/ha</div>
     </div>
   </div>
 
@@ -714,29 +714,29 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
           <td style="font-size:13px;">Agrofer (semilla + fertilizante + agroquímicos)</td>
           <td class="num" style="font-size:13px;font-weight:600;">$2,471,745</td>
           <td class="num" style="font-size:12px;color:var(--text-dim);">$34,813</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$1,456,510</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$18,206</td>
+          <td class="num" style="font-size:13px;font-weight:600;" id="cmpAgrofer2026">$1,456,510</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpAgroferHa2026">$18,206</td>
         </tr>
         <tr>
           <td style="font-size:13px;">EazyGro (fertilización líquida)</td>
           <td class="num" style="font-size:13px;color:var(--text-dim);">—</td>
           <td class="num" style="font-size:12px;color:var(--text-dim);">—</td>
           <td class="num" style="font-size:13px;font-weight:600;">$1,290,244</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$16,128</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpEazyGroHa2026">$16,128</td>
         </tr>
         <tr>
           <td style="font-size:13px;">Mano de obra (Raya)</td>
           <td class="num" style="font-size:13px;font-weight:600;">$554,762</td>
           <td class="num" style="font-size:12px;color:var(--text-dim);">$7,814</td>
           <td class="num" style="font-size:13px;font-weight:600;">$277,015</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$3,463</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpRayaHa2026">$3,463</td>
         </tr>
         <tr>
           <td style="font-size:13px;">Gastos Indirectos (Montichely)</td>
           <td class="num" style="font-size:13px;font-weight:600;">$2,483,183</td>
           <td class="num" style="font-size:12px;color:var(--text-dim);">$34,974</td>
           <td class="num" style="font-size:13px;font-weight:600;">$1,047,838</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$13,098</td>
+          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpIndirectosHa2026">$13,098</td>
         </tr>
         <tr>
           <td style="font-size:13px;color:var(--text-dim);">Intereses (cuenta Agrofer, solo 2025)</td>
@@ -751,8 +751,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
           <td style="padding:10px 14px;font-size:12px;">TOTAL (sin intereses)</td>
           <td class="num" style="padding:10px 14px;">$5,509,690</td>
           <td class="num" style="padding:10px 14px;color:var(--red);">$77,601</td>
-          <td class="num" style="padding:10px 14px;">$4,071,607</td>
-          <td class="num" style="padding:10px 14px;color:var(--amber);">$50,895</td>
+          <td class="num" style="padding:10px 14px;" id="cmpTablaTotal2026">$4,071,607</td>
+          <td class="num" style="padding:10px 14px;color:var(--amber);" id="cmpTablaTotalHa2026">$50,895</td>
         </tr>
       </tfoot>
     </table>
@@ -985,8 +985,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 // URL se guarda en el navegador — no hay que editar código
 let SHEETS_URL = localStorage.getItem('maiz2026_sheets_url') || '';
 
-const HA = 83;
+// Hectareas sembradas -- editable desde el encabezado (input #haInput).
+// Por defecto 80 ha (lo sembrado a la fecha, jun-2026). Se guarda en el navegador.
+let HA = parseFloat(localStorage.getItem('maiz2026_ha')) || 80;
 const TC = 17.39;
+
+// Totales del ciclo 2026 -- fuente: Global Maiz 26.xlsx (pestana "Global") y
+// RELACION DE FACTURAS Agrofer.xlsx (verificado 17-jun-2026, 5 facturas en junio).
+const TOTAL_AGROFER_REAL    = 1511477;
+const TOTAL_EAZYGRO_REAL    = 1290244;
+const TOTAL_RAYA_REAL       = 277015;
+const TOTAL_INDIRECTOS_REAL = 1047838;
+const TOTAL_GASTADO    = TOTAL_AGROFER_REAL + TOTAL_EAZYGRO_REAL + TOTAL_RAYA_REAL + TOTAL_INDIRECTOS_REAL;
+const TOTAL_PROYECTADO = 4311571.36; // Global Maiz 26 -- aun no incorpora las facturas nuevas
+const COSTO_HA_2025    = 77601;      // ciclo cerrado 2025, 71 ha -- referencia fija
+const AGROFER_PRESUPUESTO_EST = 1900000; // estimado de temporada, no escala con HA
 
 const FACTURAS = [
   // ABRIL
@@ -1005,6 +1018,8 @@ const FACTURAS = [
   {mes:'Abril',fecha:'2026-04-30',folio:'AQ-12954',producto:'Dracolor 15×950ml',categoria:'Herbicida',cant:25,unidad:'LTO',precio:301.89,importe:8000},
   {mes:'Abril',fecha:'2026-04-30',folio:'AQ-12954',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:10,unidad:'KG',precio:179.25,importe:1900},
   {mes:'Abril',fecha:'2026-04-30',folio:'AQ-12954',producto:'Sulkan 12 × 1 Lt',categoria:'Fungicida',cant:7,unidad:'LTO',precio:85,importe:595},
+  {mes:'Abril',fecha:'2026-04-24',folio:'NOTA CRE ANT SE-1131',producto:'Nota de crédito (ajuste anterior)',categoria:'Otros',cant:1,unidad:'-',precio:-3996,importe:-3996},
+  {mes:'Abril',fecha:'2026-04-28',folio:'DEV AQ-598',producto:'Devolución de mercancía',categoria:'Otros',cant:1,unidad:'-',precio:-6600,importe:-6600},
   // MAYO
   {mes:'Mayo',fecha:'2026-05-04',folio:'AQ-12967',producto:'Dracolor 15×950ml',categoria:'Herbicida',cant:25,unidad:'LTO',precio:301.89,importe:8000},
   {mes:'Mayo',fecha:'2026-05-04',folio:'AQ-12967',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:10,unidad:'KG',precio:179.25,importe:1900},
@@ -1038,6 +1053,9 @@ const FACTURAS = [
   // JUNIO
   {mes:'Junio',fecha:'2026-06-03',folio:'AQ-13212',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:18147,importe:18147},
   {mes:'Junio',fecha:'2026-06-04',folio:'AQ-13236',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:1492,importe:1492},
+  {mes:'Junio',fecha:'2026-06-08',folio:'AQ-13280',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:31080,importe:31080},
+  {mes:'Junio',fecha:'2026-06-10',folio:'AQ-13312',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:20157,importe:20157},
+  {mes:'Junio',fecha:'2026-06-16',folio:'AQ-13373',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:3730,importe:3730},
 ];
 
 const EEZYGRO = [
@@ -1454,7 +1472,7 @@ function initEezyGroChart() {
   const vals = EEZYGRO.map(p => p.lt_ha * p.precio_usd * TC * HA);
   const colors = ['#15803d55','#15803d44','#4d7c0f55','#4d7c0f44','#c27a0955','#0369a155','#6d28d955','#0e7a7055','#b91c1c55','#6b280055','#d9770655','#05966955'];
   makeChart('chartEezyGro','bar',labels,[{
-    label:'Total 83 ha MXN', data:vals,
+    label:`Total ${HA} ha MXN`, data:vals,
     backgroundColor:colors, borderColor:colors.map(c=>c.slice(0,-2)+'ff'), borderWidth:1, borderRadius:4
   }],{plugins:{legend:{display:false}},scales:{
     x:{ticks:{color:'#7a9485',font:{size:10}},grid:{color:'#d0e4d833'}},
@@ -1933,7 +1951,7 @@ function initComparativoCharts() {
     ['Agrofer', 'EazyGro', 'Mano de obra (Raya)', 'Indirectos'],
     [
       { label: '2025 cerrado (71 ha)',        data: [2471745, 0, 554762, 2483183], backgroundColor: '#b91c1c33', borderColor: '#b91c1c', borderWidth: 1, borderRadius: 4 },
-      { label: '2026 real a la fecha (80 ha)', data: [1456510, 1290244, 277015, 1047838], backgroundColor: '#c27a0933', borderColor: '#c27a09', borderWidth: 1, borderRadius: 4 }
+      { label: `2026 real a la fecha (${HA} ha)`, data: [TOTAL_AGROFER_REAL, TOTAL_EAZYGRO_REAL, TOTAL_RAYA_REAL, TOTAL_INDIRECTOS_REAL], backgroundColor: '#c27a0933', borderColor: '#c27a09', borderWidth: 1, borderRadius: 4 }
     ],
     {
       plugins: { legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } },
@@ -2047,6 +2065,95 @@ function initIndirectos2025Charts() {
 }
 
 /* ═══════════════════════════════════════════
+   HECTAREAS EDITABLES -- recalculo en vivo
+═══════════════════════════════════════════ */
+function fmt0(n) { return Math.round(n).toLocaleString('es-MX'); }
+
+function recalcHA() {
+  const input = document.getElementById('haInput');
+  if (input) input.value = HA;
+
+  const costoHa   = TOTAL_PROYECTADO / HA;
+  const totalT    = HA * 18;
+  const costoTon  = TOTAL_PROYECTADO / totalT;
+  const gastadoHa = TOTAL_GASTADO / HA;
+  const pctGastado = (TOTAL_GASTADO / TOTAL_PROYECTADO) * 100;
+  const diffHa  = costoHa - COSTO_HA_2025;
+  const diffPct = (diffHa / COSTO_HA_2025) * 100;
+
+  const progUsdPerHa = EEZYGRO.reduce((s, p) => s + p.lt_ha * p.precio_usd, 0);
+  const progUsd = progUsdPerHa * HA;
+  const progMxn = progUsd * TC;
+
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  ['haLabel1','haLabel2','haLabel3','haLabel4','haLabel5','haLabel6'].forEach(id => setText(id, HA));
+
+  setText('kpiCostoHaValue', '$' + fmt0(costoHa));
+  setText('kpiCostoTonValue', '$' + fmt0(costoTon));
+  setText('kpiTotalT', fmt0(totalT));
+  setText('kpiTotalReal', '$' + fmt0(TOTAL_GASTADO));
+  setText('kpiTotalRealNote', `Directos $${fmt0(TOTAL_AGROFER_REAL + TOTAL_EAZYGRO_REAL + TOTAL_RAYA_REAL)} + Indirectos $${fmt0(TOTAL_INDIRECTOS_REAL)}`);
+  setText('kpi-agrofer', fmt0(TOTAL_AGROFER_REAL));
+  setText('totalGastadoBanner', '$' + fmt0(TOTAL_GASTADO));
+  setText('totalGastadoBannerNote', `Agrofer $${fmt0(TOTAL_AGROFER_REAL)} · EazyGro $${fmt0(TOTAL_EAZYGRO_REAL)} · Raya $${fmt0(TOTAL_RAYA_REAL)} · Indirectos $${fmt0(TOTAL_INDIRECTOS_REAL)}`);
+  setText('bannerPct', pctGastado.toFixed(1) + '%');
+  setText('bannerGastadoHa', '$' + fmt0(gastadoHa));
+  setText('bannerGastadoHaNote', 'de $' + fmt0(costoHa) + ' estimado');
+  setText('kpiProgramaUsd', 'USD $' + fmt0(progUsd));
+  setText('kpiProgramaMxn', 'MXN $' + fmt0(progMxn));
+  setText('thHaUsd', `Total ${HA} ha USD`);
+  setText('thHaMxn', `Total ${HA} ha MXN`);
+  setText('chartEezyGroTitle', `Costo por producto – programa completo ${HA} ha (MXN)`);
+  setText('costoHaFooterReal', '$' + fmt0(TOTAL_GASTADO));
+  setText('costoHaFooterHaValue', '$' + fmt0(costoHa));
+  setText('beTotalT', fmt0(totalT) + ' t');
+  setText('beCostoTon', '$' + fmt0(costoTon) + '/t');
+  setText('beCostoTonNote', `$${fmt0(TOTAL_PROYECTADO)} / ${fmt0(totalT)} t (con indirectos)`);
+  setText('compRealValue', '$' + fmt0(TOTAL_GASTADO));
+  setText('compRealHaNote', `$${fmt0(gastadoHa)}/ha · ${HA} ha · semana 24/52`);
+  setText('compProyHaNote', `$${fmt0(costoHa)}/ha · fuente: Global Maíz 26`);
+  setText('compDiffPct', diffPct.toFixed(1) + '%');
+  setText('compDiffHa', (diffHa < 0 ? '-' : '+') + '$' + fmt0(Math.abs(diffHa)) + '/ha');
+
+  const agroferHa     = TOTAL_AGROFER_REAL / HA;
+  const eazygroHa     = TOTAL_EAZYGRO_REAL / HA;
+  const rayaHa        = TOTAL_RAYA_REAL / HA;
+  const indirectosHa  = TOTAL_INDIRECTOS_REAL / HA;
+  const agroferPct    = Math.min(100, (TOTAL_AGROFER_REAL / AGROFER_PRESUPUESTO_EST) * 100);
+
+  setText('agroferProgPct', agroferPct.toFixed(0) + '%');
+  const fillEl = document.getElementById('agroferProgFill');
+  if (fillEl) fillEl.style.width = agroferPct.toFixed(0) + '%';
+  setText('agroferProgNote', `$${fmt0(TOTAL_AGROFER_REAL)} / ~$${fmt0(AGROFER_PRESUPUESTO_EST)} est.`);
+
+  setText('cmpAgrofer2026', '$' + fmt0(TOTAL_AGROFER_REAL));
+  setText('cmpAgroferHa2026', '$' + fmt0(agroferHa));
+  setText('cmpEazyGroHa2026', '$' + fmt0(eazygroHa));
+  setText('cmpRayaHa2026', '$' + fmt0(rayaHa));
+  setText('cmpIndirectosHa2026', '$' + fmt0(indirectosHa));
+  setText('cmpTablaTotal2026', '$' + fmt0(TOTAL_GASTADO));
+  setText('cmpTablaTotalHa2026', '$' + fmt0(gastadoHa));
+
+  renderEezyGroTable();
+  if (activeCharts['chartEezyGro']) initEezyGroChart();
+  if (activeCharts['chartTotalCiclos']) initComparativoCharts();
+}
+
+function updateHA(val) {
+  const n = parseFloat(val);
+  if (!n || n <= 0) {
+    showStatus('Ingresa un número de hectáreas válido', false);
+    recalcHA();
+    return;
+  }
+  HA = n;
+  localStorage.setItem('maiz2026_ha', String(n));
+  recalcHA();
+  showStatus('Hectáreas actualizadas a ' + n + ' ha', true);
+}
+
+/* ═══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
 // Inyecta la animación de rotación para el spinner del botón Sync
@@ -2060,6 +2167,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderEezyGroTable();
   renderRayaTable();
   updateConfigStatus();
+  recalcHA();
   // Auto-sync si ya hay URL guardada
   if (SHEETS_URL) syncFromSheets();
 });
