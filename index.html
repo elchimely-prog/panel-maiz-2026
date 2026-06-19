@@ -2,2175 +2,462 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Maíz 2026 · Montichely</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calibración de Maquinaria — Montichely</title>
 <style>
-:root {
-  --bg: #eef4f0;
-  --surface: #f8fbf9;
-  --card: #ffffff;
-  --border: #d0e4d8;
-  --border2: #b3cfbf;
-  --amber: #c27a09;
-  --amber2: #a36208;
-  --green: #15803d;
-  --lime: #4d7c0f;
-  --red: #b91c1c;
-  --blue: #0369a1;
-  --purple: #6d28d9;
-  --muted: #6b8c75;
-  --text: #14291e;
-  --text-dim: #5a7a66;
-  --text-bright: #0c1f14;
-}
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
-.mono { font-family: 'JetBrains Mono', monospace; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04); }
-.surface { background: var(--surface); }
+  :root{
+    --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Consolas,monospace;
+    --sans:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#1E1D1A;}
+  body{font-family:var(--sans);}
 
-/* Tabs */
-.tab-btn { padding: 9px 18px; border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap; }
-.tab-active { background: var(--amber); color: #fff; font-weight: 600; }
-.tab-inactive { color: var(--text-dim); }
-.tab-inactive:hover { color: var(--text); background: var(--border); }
+  .shell{
+    background:#23211D;padding:14px 16px 0;position:sticky;top:0;z-index:10;
+  }
+  .shell-inner{max-width:640px;margin:0 auto;}
+  .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#A7A18D;font-weight:700;margin:0 0 4px;}
+  .shell h1{font-size:19px;margin:0 0 12px;font-weight:700;letter-spacing:-0.01em;color:#F4F2EA;}
+  .main-tabs{display:flex;gap:6px;}
+  .main-tab-btn{
+    flex:1;padding:11px 6px;border-radius:8px 8px 0 0;border:none;background:#2C2A25;
+    color:#B9B4A4;font-family:var(--sans);font-weight:700;font-size:13.5px;cursor:pointer;
+  }
+  .main-tab-btn:focus-visible{outline:2px solid #F4F2EA;outline-offset:2px;}
+  .main-tab-btn[data-tab="fert"].active{background:#4F6B3A;color:#FBFAF6;}
+  .main-tab-btn[data-tab="fum"].active{background:#1F6F78;color:#FBFDFC;}
+  .main-tab-btn[data-tab="semb"].active{background:#A8742A;color:#FCFAF4;}
 
-/* KPI cards */
-.kpi-card { position: relative; overflow: hidden; }
-.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-.kpi-amber::before { background: var(--amber); }
-.kpi-green::before { background: var(--green); }
-.kpi-lime::before { background: var(--lime); }
-.kpi-red::before { background: var(--red); }
-.kpi-blue::before { background: var(--blue); }
-.kpi-purple::before { background: var(--purple); }
+  main#app{min-height:100vh;padding-bottom:48px;background-size:24px 24px;}
+  main#app.theme-fert{
+    --accent:#4F6B3A;--accent-soft:#E3EAD9;--bg:#E7EAE2;--grid:rgba(32,38,28,.07);
+    --ink:#20261F;--ink-soft:#52594B;--surface:#FBFAF6;--surface-border:rgba(32,38,28,.14);
+  }
+  main#app.theme-fum{
+    --accent:#1F6F78;--accent-soft:#DCEFEF;--bg:#E3EBEA;--grid:rgba(20,40,42,.07);
+    --ink:#15292B;--ink-soft:#4C6264;--surface:#FBFDFC;--surface-border:rgba(20,40,42,.14);
+  }
+  main#app.theme-semb{
+    --accent:#A8742A;--accent-soft:#F1E3C7;--bg:#EDE7DA;--grid:rgba(50,38,12,.07);
+    --ink:#2B2210;--ink-soft:#5C5238;--surface:#FCFAF4;--surface-border:rgba(50,38,12,.14);
+  }
+  main#app{
+    background-color:var(--bg);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    color:var(--ink);
+  }
 
-/* Table */
-.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.data-table th { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface); }
-.data-table td { padding: 9px 14px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text); }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tbody tr:hover td { background: #e8f5ed88; }
-.data-table .num { font-family: 'JetBrains Mono', monospace; text-align: right; }
-.table-footer td { background: var(--surface); font-weight: 600; border-top: 2px solid var(--border2); font-family: 'JetBrains Mono', monospace; color: var(--text); }
+  .wrap{max-width:640px;margin:0 auto;padding:18px 16px 0;}
+  .panel{display:none;}
+  .panel.active{display:block;}
 
-/* Badges */
-.badge { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: .02em; }
-.b-semilla    { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-.b-fertilizante { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-.b-herbicida  { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-.b-insecticida{ background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
-.b-fungicida  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-.b-adyuvante  { background: #cffafe; color: #155e75; border: 1px solid #67e8f9; }
-.b-real       { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-.b-proy       { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .segmented{display:flex;gap:8px;margin-bottom:18px;}
+  .segmented.cols-4{display:grid;grid-template-columns:1fr 1fr;}
+  .seg-btn{
+    flex:1;padding:11px 8px;border-radius:var(--radius);
+    border:1.5px solid var(--surface-border);background:var(--surface);
+    font-family:var(--sans);font-size:14.5px;font-weight:600;color:var(--ink-soft);
+    cursor:pointer;transition:background .15s,color .15s,border-color .15s;
+  }
+  .seg-btn.active{background:var(--accent);color:var(--surface);border-color:var(--accent);}
+  .seg-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
-/* Progress bar */
-.prog-track { background: var(--border); border-radius: 4px; height: 8px; overflow: hidden; }
-.prog-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+  .card{background:var(--surface);border:1px solid var(--surface-border);border-radius:var(--radius);padding:16px;margin-bottom:18px;}
+  .card h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 14px;font-weight:700;}
+  .param-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--surface-border);gap:10px;}
+  .param-row:last-child{border-bottom:none;}
+  .param-label{font-size:14.5px;color:var(--ink);flex:1;min-width:0;}
+  .stepper{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  .stepper button{
+    width:30px;height:30px;border-radius:8px;border:1px solid var(--surface-border);
+    background:#fff;color:var(--accent);font-size:17px;font-weight:700;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .stepper button:active{background:var(--accent-soft);}
+  .stepper input{
+    width:78px;text-align:center;font-family:var(--mono);font-size:15px;font-weight:600;
+    border:1px solid var(--surface-border);border-radius:8px;padding:6px 4px;color:var(--ink);background:#fff;
+  }
+  .stepper input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .unit{font-size:11.5px;color:var(--ink-soft);width:62px;flex-shrink:0;text-align:right;}
 
-/* Filter bar */
-.filter-input { background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 12px; font-size: 13px; outline: none; }
-.filter-input:focus { border-color: var(--amber); box-shadow: 0 0 0 2px #c27a0922; }
-.filter-input option { background: var(--card); color: var(--text); }
+  .reset-btn{display:block;margin:0 auto 4px;background:none;border:none;color:var(--ink-soft);font-size:12.5px;text-decoration:underline;cursor:pointer;font-family:var(--sans);padding:6px;}
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  .strip-section h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;font-weight:700;}
+  .strip{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x proximate;-webkit-overflow-scrolling:touch;}
+  .strip::-webkit-scrollbar{height:6px;}
+  .strip::-webkit-scrollbar-thumb{background:var(--surface-border);border-radius:4px;}
+  .vuelta-card{
+    scroll-snap-align:start;flex:0 0 142px;background:var(--surface);
+    border:1px solid var(--surface-border);border-left:4px solid var(--accent);
+    border-radius:var(--radius);padding:12px 12px 14px;position:relative;
+  }
+  .vuelta-card.done{background:var(--accent-soft);}
+  .vuelta-num{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--accent);line-height:1;}
+  .vuelta-num span{font-size:11px;font-weight:600;color:var(--ink-soft);margin-left:4px;}
+  .metric{margin-top:9px;}
+  .metric .m-label{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);}
+  .metric .m-value{font-family:var(--mono);font-size:15.5px;font-weight:700;color:var(--ink);}
+  .metric .m-value small{font-size:11px;font-weight:500;color:var(--ink-soft);}
+  .badge{
+    position:absolute;top:-9px;right:8px;background:var(--accent);color:var(--surface);
+    font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:6px;
+  }
 
-/* Upload btn */
-.upload-btn { background: var(--card); color: var(--text); border: 1px solid var(--border2); border-radius: 7px; padding: 8px 15px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all .15s; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
-.upload-btn:hover { border-color: var(--amber); color: var(--amber); background: #fef3c7; }
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  .summary-cell{background:var(--surface);border:1px solid var(--surface-border);border-left:4px solid var(--accent);border-radius:var(--radius);padding:12px;}
+  .summary-cell .s-label{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);}
+  .summary-cell .s-value{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--ink);margin-top:3px;}
+  .summary-cell .s-value small{font-size:11.5px;font-weight:500;color:var(--ink-soft);}
+  .summary-cell.wide{grid-column:1 / -1;}
+  .summary-cell.highlight{background:var(--accent-soft);}
 
-/* Section heading */
-.section-heading { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); font-weight: 600; margin-bottom: 12px; }
+  .note{
+    background:var(--accent-soft);border:1px dashed var(--accent);border-radius:8px;
+    padding:10px 12px;font-size:12.5px;color:var(--ink);margin-bottom:18px;line-height:1.5;
+  }
 
-/* Divider */
-.vdiv { width: 1px; background: var(--border); align-self: stretch; }
-
-@media(max-width: 768px) {
-  .grid-cols-3-r { grid-template-columns: 1fr 1fr !important; }
-  .grid-cols-2-r { grid-template-columns: 1fr !important; }
-}
+  footer.foot{max-width:640px;margin:6px auto 0;padding:0 16px 24px;color:var(--ink-soft);font-size:12px;line-height:1.5;}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════ HEADER ═══════════════ -->
-<header style="background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);" class="px-5 py-3 flex items-center justify-between sticky top-0 z-50">
-  <div class="flex items-center gap-3">
-    <div style="background:var(--amber);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M6 6c0 5 6 8 6 8s6-3 6-8"/><path d="M3 12c0 4 4 7 9 7s9-3 9-7"/></svg>
-    </div>
-    <div>
-      <div style="color:var(--text-bright);font-size:13px;font-weight:600;letter-spacing:.02em;">Sociedad Agrícola Montichely</div>
-      <div style="color:var(--text-dim);font-size:11px;">Ciclo Maíz 2026 &middot; Abasolo, Gto. &middot; <input id="haInput" type="number" min="1" step="0.5" value="80" onchange="updateHA(this.value)" title="Hectáreas sembradas -- editable" style="width:50px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 4px;font-size:11px;color:var(--text);text-align:right;font-family:inherit;"> ha &middot; Meta 18 t/ha</div>
+<div class="shell">
+  <div class="shell-inner">
+    <p class="eyebrow">Sociedad Agrícola Montichely</p>
+    <h1>Calibración de maquinaria</h1>
+    <div class="main-tabs">
+      <button class="main-tab-btn active" data-tab="fert">Fertilización</button>
+      <button class="main-tab-btn" data-tab="fum">Fumigación</button>
+      <button class="main-tab-btn" data-tab="semb">Sembradora</button>
     </div>
   </div>
-  <div class="flex items-center gap-3">
-    <div id="updateLabel" style="color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace;">Datos al 12 Jun 2026</div>
-    <button onclick="syncFromSheets()" id="syncBtn" style="background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:7px;padding:8px 15px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.07);" onmouseover="this.style.borderColor='#15803d';this.style.color='#15803d'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text)'">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-      Sync Sheets
-    </button>
-    <button onclick="openConfig()" id="configBtn" title="Configurar conexión a Google Sheets" style="background:var(--card);color:var(--text-dim);border:1px solid var(--border);border-radius:7px;padding:8px 11px;font-size:13px;cursor:pointer;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.07);" onmouseover="this.style.borderColor='#c27a09';this.style.color='#c27a09'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    </button>
-    <label class="upload-btn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Cargar Excel
-      <input type="file" accept=".xlsx,.xls,.csv" class="hidden" id="fileInput" onchange="handleFileUpload(event)">
-    </label>
-    <div id="uploadStatus" style="display:none;font-size:11px;padding:4px 10px;border-radius:20px;background:#14532d44;color:#166534;border:1px solid #86efac;"></div>
-  </div>
-</header>
-
-<!-- ═══════════════ TABS ═══════════════ -->
-<div style="background:var(--card);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:4px;overflow-x:auto;" id="tabBar">
-  <button class="tab-btn tab-active" onclick="switchTab(0,this)">Resumen</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab(1,this)">Facturas Agrofer</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab(2,this)">Fertilización EazyGro</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab(3,this)">Raya Rancho</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab(4,this)">Costo por Ha</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab(5,this)">Gastos Indirectos</button>
-  <button class="tab-btn tab-inactive" onclick="switchTab(6,this)">Comparativo Ciclos</button>
 </div>
 
-<!-- ═══════════════ MAIN ═══════════════ -->
-<main style="padding:20px;max-width:1400px;margin:0 auto;">
+<main id="app" class="theme-fert">
+  <div class="wrap">
 
-<!-- ─── TAB 0: RESUMEN ─── -->
-<div id="tab0">
-
-  <!-- KPI Cards -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;" class="grid-cols-3-r">
-    <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Total Facturas Agrofer</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--amber);">$<span id="kpi-agrofer">1,511,477</span></div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">Abr–Jun 2026 · Julio Santillán</div>
-    </div>
-    <div class="card kpi-card kpi-green" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">EazyGro Recibido</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--green);">$<span id="kpi-eezygro">1,290,244</span></div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">USD $74,194.60 · TC 17.39 · 70.1% del programa</div>
-    </div>
-    <div class="card kpi-card kpi-lime" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Raya Rancho (real)</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--lime);">$<span id="kpi-raya">277,015</span></div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">Semanas 15–24 · $655,015 ciclo completo</div>
-    </div>
-    <div class="card kpi-card kpi-blue" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Total Real (directos + indirectos)</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--blue);" id="kpiTotalReal">$4,126,574</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;" id="kpiTotalRealNote">Directos $3,078,736 + Indirectos $1,047,838</div>
-    </div>
-    <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Costo/Ha (Global · <span id="haLabel1">80</span> ha)</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--purple);" id="kpiCostoHaValue">$53,895</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">Total ciclo $4,311,571 · Fuente: Global Maíz 26</div>
-    </div>
-    <div class="card kpi-card kpi-red" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Costo Estimado / Tonelada</div>
-      <div class="mono" style="font-size:22px;font-weight:600;color:var(--red);" id="kpiCostoTonValue">$2,994</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">A 18 t/ha · <span id="kpiTotalT">1,440</span> t totales · <span id="haLabel2">80</span> ha</div>
-    </div>
-  </div>
-
-  <!-- Banner: Total gastado hasta el momento -->
-  <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:10px;padding:16px 22px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#15803d;margin-bottom:4px;">Total gastado hasta el momento</div>
-      <div style="font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#14291e;" id="totalGastadoBanner">$4,126,574</div>
-      <div style="font-size:12px;color:#5a7a66;margin-top:3px;" id="totalGastadoBannerNote">Agrofer $1,511,477 · EazyGro $1,290,244 · Raya $277,015 · Indirectos $1,047,838</div>
-    </div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap;">
-      <div style="text-align:center;">
-        <div style="font-size:11px;color:#5a7a66;margin-bottom:2px;">Del ciclo total</div>
-        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#c27a09;" id="bannerPct">94.4%</div>
-        <div style="font-size:11px;color:#5a7a66;">$4,311,571 proyectado</div>
+    <!-- PANEL FERTILIZACIÓN -->
+    <section class="panel active" id="panel-fert">
+      <div class="segmented" role="tablist" aria-label="Equipo">
+        <button class="seg-btn active" data-group="fert" data-tipo="pulpo" role="tab" aria-selected="true">Pulpo</button>
+        <button class="seg-btn" data-group="fert" data-tipo="voleadora" role="tab" aria-selected="false">Voleadora</button>
       </div>
-      <div style="width:1px;background:#86efac;"></div>
-      <div style="text-align:center;">
-        <div style="font-size:11px;color:#5a7a66;margin-bottom:2px;">Gastado / Ha</div>
-        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#0369a1;" id="bannerGastadoHa">$50,895</div>
-        <div style="font-size:11px;color:#5a7a66;" id="bannerGastadoHaNote">de $53,895 estimado</div>
+      <section class="card"><h2>Parámetros</h2><div id="params-fert"></div></section>
+      <button class="reset-btn" data-group="fert">Restablecer valores de referencia</button>
+      <section class="strip-section">
+        <h2>Resultado por vuelta</h2>
+        <div class="strip" id="strip-fert"></div>
+      </section>
+      <footer class="foot">
+        1 vuelta cubre el ancho de surco × N° de surcos, ida y vuelta sobre el largo de la tabla.
+        "Por bote" reparte la carga de la vuelta en 4 partes iguales.
+      </footer>
+    </section>
+
+    <!-- PANEL FUMIGACIÓN -->
+    <section class="panel" id="panel-fum">
+      <div class="segmented" role="tablist" aria-label="Tipo de aplicación">
+        <button class="seg-btn active" data-group="fum" data-tipo="herbicidas" role="tab" aria-selected="true">Herbicidas</button>
+        <button class="seg-btn" data-group="fum" data-tipo="agroquimicos" role="tab" aria-selected="false">Agroquímicos</button>
       </div>
-      <div style="width:1px;background:#86efac;"></div>
-      <div style="text-align:center;">
-        <div style="font-size:11px;color:#5a7a66;margin-bottom:2px;">Semana actual</div>
-        <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#6d28d9;">24 / 52</div>
-        <div style="font-size:11px;color:#5a7a66;">46% del ciclo</div>
+      <section class="card"><h2>Parámetros</h2><div id="params-fum"></div></section>
+      <button class="reset-btn" data-group="fum">Restablecer valores de referencia</button>
+      <section class="summary-grid" id="summary-fum"></section>
+      <section class="strip-section">
+        <h2>Avance por vuelta</h2>
+        <div class="strip" id="strip-fum"></div>
+      </section>
+      <footer class="foot">
+        Cada vuelta cubre 2 entradas (ida y vuelta) sobre el largo de tabla. La vuelta marcada
+        "cubre el área" es la primera que alcanza o supera el área deseada.
+      </footer>
+    </section>
+
+    <!-- PANEL SEMBRADORA -->
+    <section class="panel" id="panel-semb">
+      <div class="segmented cols-4" role="tablist" aria-label="Cultivo">
+        <button class="seg-btn active" data-group="semb" data-tipo="trigo" role="tab" aria-selected="true">Trigo</button>
+        <button class="seg-btn" data-group="semb" data-tipo="cebada" role="tab" aria-selected="false">Cebada</button>
+        <button class="seg-btn" data-group="semb" data-tipo="maiz" role="tab" aria-selected="false">Maíz</button>
+        <button class="seg-btn" data-group="semb" data-tipo="sorgo" role="tab" aria-selected="false">Sorgo</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Progress bars -->
-  <div class="card" style="padding:16px 20px;margin-bottom:20px;">
-    <div class="section-heading">Avance del ciclo</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;" class="grid-cols-3-r">
-      <div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:12px;color:var(--text-dim);">Agrofer vs. presupuesto estimado</span>
-          <span class="mono" style="font-size:12px;color:var(--amber);" id="agroferProgPct">77%</span>
-        </div>
-        <div class="prog-track"><div class="prog-fill" id="agroferProgFill" style="width:77%;background:var(--amber);"></div></div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:4px;" id="agroferProgNote">$1,456,510 / ~$1,900,000 est.</div>
+      <div class="note" id="note-semb" style="display:none;">
+        En maíz, la semilla se mide en semillas por hectárea, no en kg. El valor de fábrica
+        (90,000 semillas/ha) es un punto de partida dentro de tu rango de 60,000 a 130,000 — ajústalo
+        a la densidad real que siembras.
       </div>
-      <div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:12px;color:var(--text-dim);">EazyGro recibido vs. programa</span>
-          <span class="mono" style="font-size:12px;color:var(--green);">70.1%</span>
-        </div>
-        <div class="prog-track"><div class="prog-fill" style="width:70.1%;background:var(--green);"></div></div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">$74,195 USD / $105,901 USD</div>
-      </div>
-      <div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:12px;color:var(--text-dim);">Raya acumulada vs. ciclo</span>
-          <span class="mono" style="font-size:12px;color:var(--lime);">42.3%</span>
-        </div>
-        <div class="prog-track"><div class="prog-fill" style="width:42.3%;background:var(--lime);"></div></div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:4px;">$277,015 / $655,015</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Charts row 1 -->
-  <div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:16px;margin-bottom:16px;" class="grid-cols-2-r">
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Inversión Mensual (MXN)</div>
-      <canvas id="chartMensual" height="200"></canvas>
-    </div>
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Distribución por categoría</div>
-      <canvas id="chartCategoria" height="200"></canvas>
-    </div>
-  </div>
-
-  <!-- Charts row 2: Top 10 side by side -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" class="grid-cols-2-r">
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Top 10 productos por importe (MXN)</div>
-      <canvas id="chartTopProds" height="260"></canvas>
-    </div>
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Top 10 fertilizantes por importe (MXN)</div>
-      <canvas id="chartTopFertilizantes" height="260"></canvas>
-    </div>
-  </div>
-
-  <!-- Charts row 3: Raya semanal -->
-  <div class="card" style="padding:18px 20px;">
-    <div class="section-heading">Raya semanal – semanas 15 a 24</div>
-    <canvas id="chartRaya" height="110"></canvas>
-  </div>
-</div><!-- /tab0 -->
-
-<!-- ─── TAB 1: FACTURAS AGROFER ─── -->
-<div id="tab1" style="display:none;">
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-    <select class="filter-input" id="f-mes" onchange="filterFacturas()">
-      <option value="">Todos los meses</option>
-      <option value="Abril">Abril</option>
-      <option value="Mayo">Mayo</option>
-      <option value="Junio">Junio</option>
-    </select>
-    <select class="filter-input" id="f-cat" onchange="filterFacturas()">
-      <option value="">Todas las categorías</option>
-      <option value="Semilla">Semilla</option>
-      <option value="Fertilizante">Fertilizante</option>
-      <option value="Herbicida">Herbicida</option>
-      <option value="Insecticida">Insecticida</option>
-      <option value="Fungicida">Fungicida</option>
-      <option value="Adyuvante">Adyuvante</option>
-    </select>
-    <input class="filter-input" type="text" id="f-buscar" placeholder="Buscar producto o folio..." oninput="filterFacturas()" style="flex:1;min-width:180px;">
-    <div style="margin-left:auto;color:var(--text-dim);font-size:12px;">Mostrando <span id="f-count">44</span> partidas</div>
-  </div>
-  <div class="card" style="overflow:auto;">
-    <table class="data-table" id="tablaFacturas">
-      <thead>
-        <tr>
-          <th>Mes</th><th>Fecha</th><th>Folio</th><th>Producto</th><th>Categoría</th>
-          <th style="text-align:right">Cant.</th><th>Ud.</th>
-          <th style="text-align:right">Precio Unit.</th><th style="text-align:right">Importe</th>
-        </tr>
-      </thead>
-      <tbody id="facturasTbody"></tbody>
-      <tfoot>
-        <tr class="table-footer">
-          <td colspan="7" style="padding:10px 14px;font-size:12px;">TOTAL</td>
-          <td></td>
-          <td class="num" style="padding:10px 14px;" id="facturasTotal">$1,456,510</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div><!-- /tab1 -->
-
-<!-- ─── TAB 2: EAZYGRO ─── -->
-<div id="tab2" style="display:none;">
-
-  <!-- Summary cards -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
-    <div class="card" style="padding:16px 18px;border-top:2px solid var(--green);">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Recibido</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--green);">USD $74,194.60</div>
-      <div class="mono" style="font-size:14px;color:var(--text-dim);margin-top:2px;">MXN $1,290,244</div>
-    </div>
-    <div class="card" style="padding:16px 18px;border-top:2px solid var(--amber);">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Programa completo (<span id="haLabel3">83</span> ha)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--amber);" id="kpiProgramaUsd">USD $105,901</div>
-      <div class="mono" style="font-size:14px;color:var(--text-dim);margin-top:2px;" id="kpiProgramaMxn">MXN $1,841,610</div>
-    </div>
-    <div class="card" style="padding:16px 18px;border-top:2px solid var(--blue);">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Costo programa / ha</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--blue);">USD $1,275.91</div>
-      <div class="mono" style="font-size:14px;color:var(--text-dim);margin-top:2px;">MXN $22,188 · TC 17.39</div>
-    </div>
-  </div>
-
-  <!-- Progress -->
-  <div class="card" style="padding:16px 20px;margin-bottom:18px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-size:13px;font-weight:500;">Avance del programa de fertilización líquida</span>
-      <span class="mono" style="font-size:16px;font-weight:600;color:var(--green);">70.1%</span>
-    </div>
-    <div style="background:var(--border);border-radius:6px;height:14px;overflow:hidden;position:relative;">
-      <div style="width:70.1%;height:100%;background:linear-gradient(90deg,var(--green),var(--lime));border-radius:6px;transition:width 1.2s ease;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:6px;">
-      <span style="font-size:11px;color:var(--green);">Recibido: USD $74,194.60</span>
-      <span style="font-size:11px;color:var(--text-dim);">Pendiente: USD $31,706</span>
-      <span style="font-size:11px;color:var(--amber);">Total programa: USD $105,901</span>
-    </div>
-  </div>
-
-  <!-- Program Table -->
-  <div class="card" style="overflow:auto;margin-bottom:18px;">
-    <div style="padding:14px 18px 0;margin-bottom:8px;">
-      <div class="section-heading">Programa de nutrición líquida por hectárea · TC USD/MXN: 17.39</div>
-    </div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Producto</th><th style="text-align:right">L o pq/ha</th>
-          <th style="text-align:right">Precio USD/L</th>
-          <th style="text-align:right">USD/ha</th>
-          <th style="text-align:right">MXN/ha</th>
-          <th style="text-align:right" id="thHaUsd">Total 83 ha USD</th>
-          <th style="text-align:right" id="thHaMxn">Total 83 ha MXN</th>
-        </tr>
-      </thead>
-      <tbody id="eezygroTbody"></tbody>
-      <tfoot>
-        <tr class="table-footer">
-          <td colspan="3" style="padding:10px 14px;font-size:12px;">TOTAL PROGRAMA</td>
-          <td class="num" style="padding:10px 14px;">$1,275.91</td>
-          <td class="num" style="padding:10px 14px;">$22,188</td>
-          <td class="num" style="padding:10px 14px;">$105,901</td>
-          <td class="num" style="padding:10px 14px;">$1,841,610</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- EazyGro chart -->
-  <div class="card" style="padding:18px 20px;">
-    <div class="section-heading" id="chartEezyGroTitle">Costo por producto – programa completo 83 ha (MXN)</div>
-    <canvas id="chartEezyGro" height="180"></canvas>
-  </div>
-</div><!-- /tab2 -->
-
-<!-- ─── TAB 3: RAYA RANCHO ─── -->
-<div id="tab3" style="display:none;">
-  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;align-items:start;" class="grid-cols-2-r">
-    <div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;" class="grid-cols-2-r">
-        <div class="card" style="padding:14px 16px;border-top:2px solid var(--lime);">
-          <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Real acumulado</div>
-          <div class="mono" style="font-size:18px;font-weight:600;color:var(--lime);">$277,015</div>
-          <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Sem. 15–24</div>
-        </div>
-        <div class="card" style="padding:14px 16px;border-top:2px solid var(--amber);">
-          <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Total ciclo</div>
-          <div class="mono" style="font-size:18px;font-weight:600;color:var(--amber);">$655,015</div>
-          <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Sem. 15–52</div>
-        </div>
-      </div>
-      <div class="card" style="overflow:auto;">
-        <table class="data-table">
-          <thead><tr><th>Semana</th><th>Fechas</th><th style="text-align:right">Pago $</th><th style="text-align:right">Acumulado</th><th>Estado</th></tr></thead>
-          <tbody id="rayaTbody"></tbody>
-          <tfoot>
-            <tr class="table-footer">
-              <td colspan="2" style="padding:10px 14px;font-size:12px;">TOTAL CICLO</td>
-              <td class="num" style="padding:10px 14px;">$655,015</td>
-              <td class="num" style="padding:10px 14px;"></td><td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Pago semanal y acumulado (MXN)</div>
-      <canvas id="chartRayaDetalle" height="320"></canvas>
-    </div>
-  </div>
-</div><!-- /tab3 -->
-
-<!-- ─── TAB 4: COSTO POR HA ─── -->
-<div id="tab4" style="display:none;">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Desglose de costo por hectárea (MXN)</div>
-      <canvas id="chartCostoHa" height="260"></canvas>
-    </div>
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Resumen de inversión total</div>
-      <table class="data-table" style="margin-top:4px;">
-        <thead><tr><th>Concepto</th><th>Real</th><th>Ciclo completo</th><th>/Ha proyectado</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="font-size:13px;">Semilla (Salamandra)</td>
-            <td class="num" style="color:var(--green);">$850,425</td>
-            <td class="num">$850,425</td>
-            <td class="num" style="color:var(--amber);">$10,246</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;">Fertilizante Terratec 18-12-05</td>
-            <td class="num" style="color:var(--green);">$461,024</td>
-            <td class="num">$461,024</td>
-            <td class="num" style="color:var(--amber);">$5,554</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;">Herbicidas</td>
-            <td class="num" style="color:var(--green);">$72,331</td>
-            <td class="num">$~85,000</td>
-            <td class="num" style="color:var(--amber);">$1,024</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;">Insecticidas</td>
-            <td class="num" style="color:var(--green);">$52,890</td>
-            <td class="num">$~65,000</td>
-            <td class="num" style="color:var(--amber);">$783</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;">Fungicidas + Adyuvantes</td>
-            <td class="num" style="color:var(--green);">$10,797</td>
-            <td class="num">$~13,000</td>
-            <td class="num" style="color:var(--amber);">$157</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;">Fertilización líquida EazyGro</td>
-            <td class="num" style="color:var(--green);">$1,290,244</td>
-            <td class="num">$1,841,610</td>
-            <td class="num" style="color:var(--amber);">$22,188</td>
-          </tr>
-          <tr>
-            <td style="font-size:13px;">Mano de obra (raya)</td>
-            <td class="num" style="color:var(--green);">$277,015</td>
-            <td class="num">$655,015</td>
-            <td class="num" style="color:var(--amber);">$7,892</td>
-          </tr>
-          <tr style="border-top:1px solid var(--border2);">
-            <td style="font-size:13px;color:var(--blue);">Gastos Indirectos (Operativos + Administrativos)</td>
-            <td class="num" style="color:var(--blue);">$1,047,838</td>
-            <td class="num" style="color:var(--blue);">$1,447,838</td>
-            <td class="num" style="color:var(--blue);">$18,098</td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr class="table-footer">
-            <td style="padding:10px 14px;font-size:12px;">TOTAL</td>
-            <td class="num" style="padding:10px 14px;color:var(--green);" id="costoHaFooterReal">$4,071,607</td>
-            <td class="num" style="padding:10px 14px;">$4,311,571</td>
-            <td class="num" style="padding:10px 14px;color:var(--amber);"><span id="costoHaFooterHaValue">$53,895</span> <span style="font-size:10px;font-weight:400;">/ha (<span id="haLabel4">80</span> ha)</span></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-
-  <!-- Terratec detail -->
-  <div class="card" style="padding:18px 20px;margin-bottom:16px;">
-    <div class="section-heading">Detalle fertilizante base – Mezcla Terratec STD 18-12-05 + Micronutrientes</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;" class="grid-cols-2-r">
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Total adquirido</div>
-        <div class="mono" style="font-size:17px;color:var(--amber);font-weight:600;">32,000 kg</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">640 sacos × 50 kg</div>
-      </div>
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Aplicación por ha</div>
-        <div class="mono" style="font-size:17px;color:var(--amber);font-weight:600;">385.5 kg/ha</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">~400 kg/ha (referencia)</div>
-      </div>
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Precio unitario</div>
-        <div class="mono" style="font-size:17px;color:var(--amber);font-weight:600;">$14.407/kg</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$720.35 / saco 50 kg</div>
-      </div>
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Importe total</div>
-        <div class="mono" style="font-size:17px;color:var(--amber);font-weight:600;">$461,024</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$5,554/ha</div>
-      </div>
-    </div>
-    <div style="margin-top:12px;padding:10px 14px;background:var(--surface);border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--text-dim);">
-      Fórmula: <span style="color:var(--text);">18-12-05 (N-P-K)</span> + micronutrientes · Proveedor: Agrofer (Julio Santillán Solís) · Factura AQ-12870 · 10 Abr 2026 · RFC SASJ5604246T5
-    </div>
-  </div>
-
-  <!-- Break-even -->
-  <div class="card" style="padding:18px 20px;">
-    <div class="section-heading">Análisis punto de equilibrio</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;" class="grid-cols-2-r">
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Producción estimada</div>
-        <div class="mono" style="font-size:17px;color:var(--green);font-weight:600;" id="beTotalT">1,440 t</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;"><span id="haLabel5">80</span> ha × 18 t/ha</div>
-      </div>
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Costo / tonelada</div>
-        <div class="mono" style="font-size:17px;color:var(--red);font-weight:600;" id="beCostoTon">$2,994/t</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="beCostoTonNote">$4,311,571 / 1,440 t (con indirectos)</div>
-      </div>
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Precio mínimo p/e</div>
-        <div class="mono" style="font-size:17px;color:var(--amber);font-weight:600;">$2,597/t</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Sin margen; ref. ~$4,500/t</div>
-      </div>
-      <div style="background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);">
-        <div style="color:var(--text-dim);font-size:11px;margin-bottom:5px;">Margen estimado (a $4,500)</div>
-        <div class="mono" style="font-size:17px;color:var(--green);font-weight:600;">$2,168,429</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">50% sobre costos totales</div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /tab4 -->
-
-<!-- ─── TAB 5: GASTOS INDIRECTOS ─── -->
-<div id="tab5" style="display:none;">
-
-  <!-- KPIs -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
-    <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Indirectos reales (Abr–Jun)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--amber);">$1,047,838</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Operativo + Administrativo</div>
-    </div>
-    <div class="card kpi-card kpi-green" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Total registrado (Global)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--green);">$1,447,838</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Operativo proyectado + Administrativo real</div>
-    </div>
-    <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Indirectos / ha (80 ha)</div>
-      <div class="mono" style="font-size:20px;font-weight:600;color:var(--purple);">$18,098</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Real: $13,098/ha · 34% del costo total</div>
-    </div>
-  </div>
-
-  <!-- Progress -->
-  <div class="card" style="padding:14px 18px;margin-bottom:18px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
-      <span style="font-size:13px;font-weight:500;">Indirectos reales vs. registrado en Global</span>
-      <span class="mono" style="font-size:15px;font-weight:600;color:var(--amber);">72.4%</span>
-    </div>
-    <div style="background:var(--border);border-radius:5px;height:10px;overflow:hidden;">
-      <div style="width:72.4%;height:100%;background:linear-gradient(90deg,var(--amber),var(--amber2));border-radius:5px;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;">
-      <span style="color:var(--amber);">Real Abr–Jun: $1,047,838</span>
-      <span style="color:var(--text-dim);">Pendiente: $400,000 (Operativo proyectado Jul–Nov)</span>
-      <span style="color:var(--green);">Global total: $1,447,838</span>
-    </div>
-  </div>
-
-  <!-- Charts -->
-  <div style="display:grid;grid-template-columns:1.4fr 0.6fr;gap:16px;margin-bottom:16px;" class="grid-cols-2-r">
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Gastos indirectos por mes — Operativo, Administrativo y Gastos Indirectos (MXN)</div>
-      <canvas id="chartIndMensual" height="220"></canvas>
-    </div>
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Distribución por concepto</div>
-      <canvas id="chartIndCategoria" height="220"></canvas>
-    </div>
-  </div>
-
-  <!-- Monthly summary table -->
-  <div class="card" style="overflow:auto;margin-bottom:16px;">
-    <div style="padding:14px 18px 4px;">
-      <div class="section-heading">Resumen mensual — Operativo vs. Administrativo · Origen: Global Maíz 26.xlsx (Google Drive)</div>
-    </div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Mes</th>
-          <th style="text-align:right">Operativo<br><span style="font-size:10px;color:#2d5e42;">Honorarios de campo</span></th>
-          <th style="text-align:right">Administrativo<br><span style="font-size:10px;color:#2d5e42;">Honorarios de gestión</span></th>
-          <th style="text-align:right">Gastos Indirectos<br><span style="font-size:10px;color:#2d5e42;">Cta. Banamex + Efectivo</span></th>
-          <th style="text-align:right">Total mes</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody id="indMensualTbody"></tbody>
-      <tfoot>
-        <tr class="table-footer">
-          <td style="padding:10px 14px;font-size:12px;">TOTAL REGISTRADO</td>
-          <td class="num" style="padding:10px 14px;">$654,000</td>
-          <td class="num" style="padding:10px 14px;">$271,977</td>
-          <td class="num" style="padding:10px 14px;">$521,862</td>
-          <td class="num" style="padding:10px 14px;color:var(--amber);font-size:14px;">$1,447,838</td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- Efectivo detail -->
-  <div class="card" style="overflow:auto;">
-    <div style="padding:14px 18px 4px;">
-      <div class="section-heading">Pagos en efectivo – detalle · Origen: hoja "Efectivo" del Global</div>
-    </div>
-    <table class="data-table">
-      <thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th style="text-align:right">Monto</th></tr></thead>
-      <tbody id="efectivoTbody"></tbody>
-      <tfoot>
-        <tr class="table-footer">
-          <td colspan="3" style="padding:10px 14px;font-size:12px;">TOTAL EFECTIVO</td>
-          <td class="num" style="padding:10px 14px;">$56,533</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-</div><!-- /tab5 -->
-
-<!-- ─── TAB 6: COMPARATIVO CICLOS ─── -->
-<div id="tab6" style="display:none;">
-
-  <!-- ═══ SECCIÓN: COMPARATIVO DE COSTO TOTAL — TODOS LOS RUBROS ═══ -->
-  <div style="font-size:15px;font-weight:600;color:var(--text-bright);margin-bottom:4px;">Comparativo de Costo Total — Ciclo 2025 (cerrado) vs. Ciclo 2026</div>
-  <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Incluye Agrofer (semilla, fertilizante, herbicidas, insecticidas, fungicidas y adyuvantes), EazyGro, mano de obra (Raya) y gastos indirectos (Montichely). 2025 es ciclo cerrado y real (71 ha); 2026 muestra real a la fecha y proyección oficial (80 ha).</div>
-
-  <!-- KPIs principales -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;" class="grid-cols-3-r">
-    <div class="card kpi-card kpi-red" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2025 (cerrado)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--red);">$5,509,690</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$77,601/ha · 71 ha · sin intereses</div>
-    </div>
-    <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2026 (real a la fecha)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--amber);" id="compRealValue">$4,071,607</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="compRealHaNote">$50,895/ha · <span id="haLabel6">80</span> ha · semana 24/52</div>
-    </div>
-    <div class="card kpi-card kpi-green" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ciclo 2026 (proyectado)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--green);">$4,311,571</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="compProyHaNote">$53,895/ha · fuente: Global Maíz 26</div>
-    </div>
-    <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Diferencia /ha (2025 vs 2026 proy.)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--purple);" id="compDiffPct">-30.5%</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;" id="compDiffHa">-$23,707/ha</div>
-    </div>
-  </div>
-
-  <!-- Alerta tendencia indirectos -->
-  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;margin-bottom:18px;font-size:12px;color:#92400e;">
-    <strong>Atención — tendencia en indirectos:</strong> con los estados de cuenta Banamex 2026 ya categorizados línea por línea (excluyendo la compra del vehículo BYD Shark y movimientos de trigo, que no son gasto operativo de maíz), el promedio mensual real de indirectos en 2026 (Abril-Mayo, meses completos) es de $399,445/mes — un 44.8% más alto que el promedio de 2025 ($275,909/mes, Abr-Dic). El diésel subió 11.7% (Mayo 2025 $25.95/L → Mayo 2026 $28.99/L), pero ese efecto explica apenas el 4.8% de la brecha — quedan más de $370/mil sin explicar por inflación de combustible. Nota: el archivo de Mayo 2026 trae un error de captura en su celda de "total" ($306,478 vs. $1,376,458 real); ya se corrigió aquí pero conviene revisarlo en el archivo fuente.
-  </div>
-
-  <!-- Chart comparativo por rubro -->
-  <div class="card" style="padding:18px 20px;margin-bottom:18px;">
-    <div class="section-heading">Costo por rubro — 2025 cerrado vs. 2026 real a la fecha (MXN)</div>
-    <canvas id="chartTotalCiclos" height="200"></canvas>
-  </div>
-
-  <!-- Tabla comparativa por rubro -->
-  <div class="card" style="overflow:auto;margin-bottom:18px;">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Rubro</th>
-          <th style="text-align:right">2025 cerrado (71 ha)</th>
-          <th style="text-align:right">$/ha 2025</th>
-          <th style="text-align:right">2026 real a la fecha (80 ha)</th>
-          <th style="text-align:right">$/ha 2026 real</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="font-size:13px;">Agrofer (semilla + fertilizante + agroquímicos)</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$2,471,745</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$34,813</td>
-          <td class="num" style="font-size:13px;font-weight:600;" id="cmpAgrofer2026">$1,456,510</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpAgroferHa2026">$18,206</td>
-        </tr>
-        <tr>
-          <td style="font-size:13px;">EazyGro (fertilización líquida)</td>
-          <td class="num" style="font-size:13px;color:var(--text-dim);">—</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">—</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$1,290,244</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpEazyGroHa2026">$16,128</td>
-        </tr>
-        <tr>
-          <td style="font-size:13px;">Mano de obra (Raya)</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$554,762</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$7,814</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$277,015</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpRayaHa2026">$3,463</td>
-        </tr>
-        <tr>
-          <td style="font-size:13px;">Gastos Indirectos (Montichely)</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$2,483,183</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$34,974</td>
-          <td class="num" style="font-size:13px;font-weight:600;">$1,047,838</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);" id="cmpIndirectosHa2026">$13,098</td>
-        </tr>
-        <tr>
-          <td style="font-size:13px;color:var(--text-dim);">Intereses (cuenta Agrofer, solo 2025)</td>
-          <td class="num" style="font-size:13px;color:var(--text-dim);">$52,966</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">$746</td>
-          <td class="num" style="font-size:13px;color:var(--text-dim);">—</td>
-          <td class="num" style="font-size:12px;color:var(--text-dim);">—</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr class="table-footer">
-          <td style="padding:10px 14px;font-size:12px;">TOTAL (sin intereses)</td>
-          <td class="num" style="padding:10px 14px;">$5,509,690</td>
-          <td class="num" style="padding:10px 14px;color:var(--red);">$77,601</td>
-          <td class="num" style="padding:10px 14px;" id="cmpTablaTotal2026">$4,071,607</td>
-          <td class="num" style="padding:10px 14px;color:var(--amber);" id="cmpTablaTotalHa2026">$50,895</td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <hr style="border:none;border-top:2px solid var(--border2);margin:24px 0;">
-
-  <!-- ═══ SECCIÓN: DETALLE FERTILIZACIÓN ═══ -->
-  <div style="font-size:15px;font-weight:600;color:var(--text-bright);margin-bottom:4px;">Detalle: Programa de Fertilización</div>
-  <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Convencional 2025 (revaluado a precios 2026) vs. EazyGro 2026, base 71 ha — el rubro de mayor ahorro dentro del comparativo total.</div>
-
-  <!-- KPIs -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
-    <div class="card kpi-card kpi-red" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Convencional 2025 (precios 2026)</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--red);">$2,107,364</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$29,681/ha · 71 ha</div>
-    </div>
-    <div class="card kpi-card kpi-green" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">EazyGro 2026</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--green);">$1,290,229</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$18,172/ha · base 71 ha</div>
-    </div>
-    <div class="card kpi-card kpi-blue" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Ahorro total</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--blue);">$817,135</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">$11,509/ha</div>
-    </div>
-    <div class="card kpi-card kpi-purple" style="padding:16px 18px;">
-      <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Diferencia porcentual</div>
-      <div class="mono" style="font-size:19px;font-weight:600;color:var(--purple);">-38.78%</div>
-      <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">EazyGro vs. Convencional</div>
-    </div>
-  </div>
-
-  <!-- Charts row -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Costo total y costo/ha — Convencional 2025 vs. EazyGro 2026</div>
-      <canvas id="chartCompTotales" height="220"></canvas>
-    </div>
-    <div class="card" style="padding:18px 20px;">
-      <div class="section-heading">Composición del costo por programa (MXN)</div>
-      <canvas id="chartCompComposicion" height="220"></canvas>
-    </div>
-  </div>
-
-  <!-- Tablas lado a lado -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
-    <div class="card" style="overflow:auto;">
-      <div style="padding:14px 18px 4px;">
-        <div class="section-heading" style="color:var(--red);">Convencional 2025 · revaluado a precios 2026</div>
-      </div>
-      <table class="data-table">
-        <thead><tr><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Costo</th><th style="text-align:right">$/ha</th></tr></thead>
-        <tbody id="conv2025Tbody"></tbody>
-        <tfoot>
-          <tr class="table-footer">
-            <td style="padding:10px 14px;font-size:12px;">TOTAL</td><td></td>
-            <td class="num" style="padding:10px 14px;">$2,107,364</td>
-            <td class="num" style="padding:10px 14px;">$29,681</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <div class="card" style="overflow:auto;">
-      <div style="padding:14px 18px 4px;">
-        <div class="section-heading" style="color:var(--green);">EazyGro 2026 · programa líquido</div>
-      </div>
-      <table class="data-table">
-        <thead><tr><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Costo</th><th style="text-align:right">$/ha</th></tr></thead>
-        <tbody id="eezy2026CompTbody"></tbody>
-        <tfoot>
-          <tr class="table-footer">
-            <td style="padding:10px 14px;font-size:12px;">TOTAL</td><td></td>
-            <td class="num" style="padding:10px 14px;">$1,290,229</td>
-            <td class="num" style="padding:10px 14px;">$18,172</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-
-  <!-- Conclusión ejecutiva -->
-  <div class="card" style="padding:18px 22px;margin-bottom:24px;">
-    <div class="section-heading">Conclusión ejecutiva</div>
-    <p style="font-size:13px;color:var(--text);line-height:1.6;margin:0;">
-      Comparando todos los rubros del ciclo, 2025 cerró en <strong style="color:var(--red);">$77,601/ha</strong> (71 ha, cifras reales y cerradas), mientras que 2026 proyecta <strong style="color:var(--green);">$53,895/ha</strong> (80 ha, según Global Maíz 26) — una reducción del <strong style="color:var(--purple);">30.5%</strong>. El motor principal de ese ahorro es la fertilización: EazyGro cuesta <strong style="color:var(--green);">38.78% menos</strong> que repetir el programa convencional 2025 a precios 2026 ($817,135 MXN de ahorro sobre 71 ha). Sin embargo, los gastos indirectos — ya categorizados línea por línea y sin contar la compra del vehículo BYD ni movimientos de trigo — están corriendo <strong style="color:var(--red);">44.8% más altos por mes</strong> en 2026 que en 2025, muy por encima de lo que explica la inflación del diésel (apenas 4.8% de esa brecha). Si esa tendencia no se controla, podría erosionar buena parte del ahorro logrado en fertilización antes de que cierre el ciclo.
-    </p>
-  </div>
-
-  <!-- ═══ SECCIÓN: GASTOS INDIRECTOS 2025 (MONTICHELY) ═══ -->
-  <div style="border-top:2px solid var(--border2);padding-top:20px;margin-top:8px;">
-    <div style="font-size:15px;font-weight:600;color:var(--text-bright);margin-bottom:4px;">Gastos Indirectos 2025 — Detalle Montichely (Abril a Diciembre)</div>
-    <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Desglosado por área a partir de los estados de cuenta Banamex/Monex. Excluye pagos a Agrofer (ya contabilizados en su hoja propia), préstamos Elías↔Montichely y ventas/rentas (son ingresos, no gastos).</div>
-
-    <!-- KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;" class="grid-cols-3-r">
-      <div class="card kpi-card kpi-red" style="padding:16px 18px;">
-        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Total Indirectos 2025 (Abr-Dic)</div>
-        <div class="mono" style="font-size:19px;font-weight:600;color:var(--red);">$2,483,183</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">9 meses · cuenta Montichely</div>
-      </div>
-      <div class="card kpi-card kpi-amber" style="padding:16px 18px;">
-        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Mes con mayor gasto</div>
-        <div class="mono" style="font-size:19px;font-weight:600;color:var(--amber);">$666,589</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Diciembre · trilla + mantenimiento</div>
-      </div>
-      <div class="card kpi-card kpi-blue" style="padding:16px 18px;">
-        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Categoría de mayor peso</div>
-        <div class="mono" style="font-size:19px;font-weight:600;color:var(--blue);">$454,421</div>
-        <div style="color:var(--text-dim);font-size:11px;margin-top:3px;">Combustibles · 18.3% del total</div>
-      </div>
-    </div>
-
-    <!-- Charts -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="grid-cols-2-r">
-      <div class="card" style="padding:18px 20px;">
-        <div class="section-heading">Por área de gasto (MXN)</div>
-        <canvas id="chartInd2025Categoria" height="240"></canvas>
-      </div>
-      <div class="card" style="padding:18px 20px;">
-        <div class="section-heading">Por mes (MXN)</div>
-        <canvas id="chartInd2025Mensual" height="240"></canvas>
-      </div>
-    </div>
-
-    <!-- Tabla por categoría -->
-    <div class="card" style="overflow:auto;margin-bottom:18px;">
-      <div style="padding:14px 18px 4px;">
-        <div class="section-heading">Detalle por área</div>
-      </div>
-      <table class="data-table">
-        <thead><tr><th>Área</th><th style="text-align:right">Monto</th><th style="text-align:right">% del total</th></tr></thead>
-        <tbody id="ind2025CatTbody"></tbody>
-        <tfoot>
-          <tr class="table-footer">
-            <td style="padding:10px 14px;font-size:12px;">TOTAL</td>
-            <td class="num" style="padding:10px 14px;">$2,483,183</td>
-            <td class="num" style="padding:10px 14px;">100%</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-
-    <!-- Tabla por mes -->
-    <div class="card" style="overflow:auto;">
-      <div style="padding:14px 18px 4px;">
-        <div class="section-heading">Detalle por mes</div>
-      </div>
-      <table class="data-table">
-        <thead><tr><th>Mes</th><th style="text-align:right">Monto</th><th>Nota</th></tr></thead>
-        <tbody id="ind2025MesTbody"></tbody>
-        <tfoot>
-          <tr class="table-footer">
-            <td style="padding:10px 14px;font-size:12px;">TOTAL</td>
-            <td class="num" style="padding:10px 14px;">$2,483,183</td><td></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-
-</div><!-- /tab6 -->
-
-</main><!-- /main -->
-
-<!-- ═══ MODAL DE CONFIGURACIÓN ═══ -->
-<div id="configModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.18);width:min(520px,94vw);padding:28px 30px;">
-
-    <!-- Header modal -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <div>
-        <div style="font-size:15px;font-weight:600;color:var(--text-bright);">Conexión a Google Sheets</div>
-        <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Pega aquí la URL de tu Apps Script para sincronizar datos en vivo</div>
-      </div>
-      <button onclick="closeConfig()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:20px;line-height:1;padding:4px;">✕</button>
-    </div>
-
-    <!-- Estado actual -->
-    <div id="configStatus" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:var(--text-dim);">
-      Estado: <span id="configStatusText" style="font-weight:600;">sin configurar</span>
-    </div>
-
-    <!-- Input URL -->
-    <label style="font-size:12px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;">URL del Apps Script</label>
-    <input id="sheetsUrlInput" type="url"
-      placeholder="https://script.google.com/macros/s/AKfy.../exec"
-      style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);outline:none;font-family:'JetBrains Mono',monospace;box-sizing:border-box;"
-      onfocus="this.style.borderColor='#c27a09'" onblur="this.style.borderColor='var(--border)'">
-    <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">La URL termina en <span style="font-family:'JetBrains Mono',monospace;color:var(--text);">.../exec</span> · Se guarda en tu navegador automáticamente</div>
-
-    <!-- Botones -->
-    <div style="display:flex;gap:10px;margin-top:20px;">
-      <button onclick="saveAndTest()" style="flex:1;background:#15803d;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;">
-        Guardar y probar conexión
-      </button>
-      <button onclick="clearConfig()" style="background:var(--surface);color:var(--text-dim);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;">
-        Limpiar
-      </button>
-    </div>
-
-    <!-- Pasos rápidos -->
-    <div style="margin-top:22px;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Cómo obtener la URL (3 pasos)</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <span style="background:#c27a09;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
-          <span style="font-size:12px;color:var(--text-dim);">En tu Google Sheet: <strong style="color:var(--text);">Extensiones → Apps Script</strong> → pega el archivo <code style="background:var(--surface);padding:1px 5px;border-radius:3px;">apps_script_maiz2026.gs</code> → Guarda</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <span style="background:#c27a09;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
-          <span style="font-size:12px;color:var(--text-dim);"><strong style="color:var(--text);">Implementar → Nueva implementación → Aplicación web</strong> · Acceso: <em>Cualquier persona</em></span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <span style="background:#c27a09;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
-          <span style="font-size:12px;color:var(--text-dim);">Copia la URL generada y pégala arriba</span>
-        </div>
-      </div>
-    </div>
+      <section class="card"><h2>Parámetros</h2><div id="params-semb"></div></section>
+      <button class="reset-btn" data-group="semb">Restablecer valores de referencia</button>
+      <section class="strip-section">
+        <h2>Resultado por vuelta</h2>
+        <div class="strip" id="strip-semb"></div>
+      </section>
+      <footer class="foot">
+        1 vuelta cubre el ancho de surco × N° de surcos, ida y vuelta sobre el largo de la tabla.
+        Semilla y abono se calculan sobre esa misma área.
+      </footer>
+    </section>
 
   </div>
-</div>
+</main>
 
 <script>
-/* ═══════════════════════════════════════════
-   DATA STORE
-═══════════════════════════════════════════ */
-// URL se guarda en el navegador — no hay que editar código
-let SHEETS_URL = localStorage.getItem('maiz2026_sheets_url') || '';
+function fmt(n, dec){
+  return n.toLocaleString("es-MX",{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
 
-// Hectareas sembradas -- editable desde el encabezado (input #haInput).
-// Por defecto 80 ha (lo sembrado a la fecha, jun-2026). Se guarda en el navegador.
-let HA = parseFloat(localStorage.getItem('maiz2026_ha')) || 80;
-const TC = 17.39;
-
-// Totales del ciclo 2026 -- fuente: Global Maiz 26.xlsx (pestana "Global") y
-// RELACION DE FACTURAS Agrofer.xlsx (verificado 17-jun-2026, 5 facturas en junio).
-const TOTAL_AGROFER_REAL    = 1511477;
-const TOTAL_EAZYGRO_REAL    = 1290244;
-const TOTAL_RAYA_REAL       = 277015;
-const TOTAL_INDIRECTOS_REAL = 1047838;
-const TOTAL_GASTADO    = TOTAL_AGROFER_REAL + TOTAL_EAZYGRO_REAL + TOTAL_RAYA_REAL + TOTAL_INDIRECTOS_REAL;
-const TOTAL_PROYECTADO = 4311571.36; // Global Maiz 26 -- aun no incorpora las facturas nuevas
-const COSTO_HA_2025    = 77601;      // ciclo cerrado 2025, 71 ha -- referencia fija
-const AGROFER_PRESUPUESTO_EST = 1900000; // estimado de temporada, no escala con HA
-
-const FACTURAS = [
-  // ABRIL
-  {mes:'Abril',fecha:'2026-04-09',folio:'SE-3769',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD118A',categoria:'Semilla',cant:20,unidad:'SCS',precio:5865,importe:117300},
-  {mes:'Abril',fecha:'2026-04-10',folio:'AQ-12870',producto:'Mezcla Terratec STD 18-12-05 + MIC 50KG',categoria:'Fertilizante',cant:640,unidad:'SCS',precio:720.35,importe:461024},
-  {mes:'Abril',fecha:'2026-04-14',folio:'SE-3788',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD004B',categoria:'Semilla',cant:20,unidad:'SCS',precio:5865,importe:117300},
-  {mes:'Abril',fecha:'2026-04-20',folio:'AQ-12903',producto:'Sulkan 12 × 1 Lt',categoria:'Fungicida',cant:4,unidad:'LTO',precio:80,importe:320},
-  {mes:'Abril',fecha:'2026-04-20',folio:'AQ-12903',producto:'Harness Xtra 12 × 1 LTO',categoria:'Herbicida',cant:20,unidad:'LTO',precio:280,importe:5600},
-  {mes:'Abril',fecha:'2026-04-20',folio:'AQ-12903',producto:'Regidor 2,4-D Amina 12 × 950ml',categoria:'Herbicida',cant:3,unidad:'LTO',precio:108.49,importe:345},
-  {mes:'Abril',fecha:'2026-04-22',folio:'SE-3834',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD018B',categoria:'Semilla',cant:20,unidad:'SCS',precio:5865,importe:117300},
-  {mes:'Abril',fecha:'2026-04-24',folio:'AQ-12927',producto:'Picador 70 PH 500g',categoria:'Herbicida',cant:5,unidad:'BOL',precio:1083.02,importe:5740},
-  {mes:'Abril',fecha:'2026-04-24',folio:'AQ-12927',producto:'Carrier 12 × 1 LTO',categoria:'Adyuvante',cant:3,unidad:'LTO',precio:228,importe:684},
-  {mes:'Abril',fecha:'2026-04-24',folio:'SE-3853',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD027B',categoria:'Semilla',cant:20,unidad:'SCS',precio:5865,importe:117300},
-  {mes:'Abril',fecha:'2026-04-28',folio:'AQ-12941',producto:'Picador 70 PH 500g',categoria:'Herbicida',cant:8,unidad:'BOL',precio:1083.02,importe:9184},
-  {mes:'Abril',fecha:'2026-04-28',folio:'AQ-12941',producto:'Carrier 12 × 1 LTO',categoria:'Adyuvante',cant:4,unidad:'LTO',precio:228,importe:912},
-  {mes:'Abril',fecha:'2026-04-30',folio:'AQ-12954',producto:'Dracolor 15×950ml',categoria:'Herbicida',cant:25,unidad:'LTO',precio:301.89,importe:8000},
-  {mes:'Abril',fecha:'2026-04-30',folio:'AQ-12954',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:10,unidad:'KG',precio:179.25,importe:1900},
-  {mes:'Abril',fecha:'2026-04-30',folio:'AQ-12954',producto:'Sulkan 12 × 1 Lt',categoria:'Fungicida',cant:7,unidad:'LTO',precio:85,importe:595},
-  {mes:'Abril',fecha:'2026-04-24',folio:'NOTA CRE ANT SE-1131',producto:'Nota de crédito (ajuste anterior)',categoria:'Otros',cant:1,unidad:'-',precio:-3996,importe:-3996},
-  {mes:'Abril',fecha:'2026-04-28',folio:'DEV AQ-598',producto:'Devolución de mercancía',categoria:'Otros',cant:1,unidad:'-',precio:-6600,importe:-6600},
-  // MAYO
-  {mes:'Mayo',fecha:'2026-05-04',folio:'AQ-12967',producto:'Dracolor 15×950ml',categoria:'Herbicida',cant:25,unidad:'LTO',precio:301.89,importe:8000},
-  {mes:'Mayo',fecha:'2026-05-04',folio:'AQ-12967',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:10,unidad:'KG',precio:179.25,importe:1900},
-  {mes:'Mayo',fecha:'2026-05-04',folio:'AQ-12967',producto:'Sulkan 12 × 1 Lt',categoria:'Fungicida',cant:8,unidad:'LTO',precio:85,importe:680},
-  {mes:'Mayo',fecha:'2026-05-04',folio:'AQ-12967',producto:'Cuadrilla 12 × 1 LTO',categoria:'Adyuvante',cant:3,unidad:'LTO',precio:181.13,importe:576},
-  {mes:'Mayo',fecha:'2026-05-05',folio:'AQ-12974',producto:'Barazo T 5G 20KG Kapsel',categoria:'Insecticida',cant:20,unidad:'SCO',precio:726.17,importe:15540},
-  {mes:'Mayo',fecha:'2026-05-05',folio:'AQ-12974',producto:'Cuadrilla 12 × 1 LTO',categoria:'Adyuvante',cant:7,unidad:'LTO',precio:181.13,importe:1344},
-  {mes:'Mayo',fecha:'2026-05-06',folio:'AQ-12991',producto:'Carrier 12 × 1 LTO',categoria:'Adyuvante',cant:7,unidad:'LTO',precio:228,importe:1596},
-  {mes:'Mayo',fecha:'2026-05-06',folio:'AQ-12991',producto:'Dracolor 15×950ml',categoria:'Herbicida',cant:30,unidad:'LTO',precio:301.89,importe:9600},
-  {mes:'Mayo',fecha:'2026-05-06',folio:'AQ-12991',producto:'Sulkan 12 × 1 Lt',categoria:'Fungicida',cant:4,unidad:'LTO',precio:85,importe:340},
-  {mes:'Mayo',fecha:'2026-05-06',folio:'AQ-12991',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:5,unidad:'KG',precio:179.25,importe:950},
-  {mes:'Mayo',fecha:'2026-05-06',folio:'AQ-12991',producto:'Cuadrilla 12 × 1 LTO',categoria:'Adyuvante',cant:5,unidad:'LTO',precio:181.13,importe:960},
-  {mes:'Mayo',fecha:'2026-05-11',folio:'AQ-13016',producto:'Faena Clásica 12 × 1 LTO',categoria:'Herbicida',cant:6,unidad:'LTO',precio:255,importe:1530},
-  {mes:'Mayo',fecha:'2026-05-11',folio:'AQ-13016',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:5,unidad:'KG',precio:179.25,importe:950},
-  {mes:'Mayo',fecha:'2026-05-11',folio:'AQ-13016',producto:'Sulkan 12 × 1 Lt',categoria:'Fungicida',cant:6,unidad:'LTO',precio:85,importe:510},
-  {mes:'Mayo',fecha:'2026-05-14',folio:'AQ-13049',producto:'Barazo T 5G 20KG Kapsel',categoria:'Insecticida',cant:20,unidad:'SCO',precio:726.17,importe:15540},
-  {mes:'Mayo',fecha:'2026-05-16',folio:'AQ-13066',producto:'Carrier 12 × 1 LTO',categoria:'Adyuvante',cant:5,unidad:'LTO',precio:228,importe:1140},
-  {mes:'Mayo',fecha:'2026-05-16',folio:'AQ-13066',producto:'Coach 90 WDG 12 × 1KG',categoria:'Insecticida',cant:3,unidad:'KG',precio:179.25,importe:570},
-  {mes:'Mayo',fecha:'2026-05-20',folio:'MC SE-95',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD019B',categoria:'Semilla',cant:10,unidad:'SCS',precio:5865,importe:58650},
-  {mes:'Mayo',fecha:'2026-05-21',folio:'AQ-13107',producto:'Laudis + Dyne-Amic KL 6×1PAQ',categoria:'Herbicida',cant:5,unidad:'PAQ',precio:1352.83,importe:7170},
-  {mes:'Mayo',fecha:'2026-05-21',folio:'AQ-13107',producto:'Atra-Mex 90 15 × 1KG',categoria:'Herbicida',cant:1,unidad:'KGM',precio:161.32,importe:171},
-  {mes:'Mayo',fecha:'2026-05-23',folio:'AQ-13119',producto:'Carrier 12 × 1 LTO',categoria:'Adyuvante',cant:5,unidad:'LTO',precio:228,importe:1140},
-  {mes:'Mayo',fecha:'2026-05-23',folio:'AQ-13119',producto:'Barazo T 5G 20KG Kapsel',categoria:'Insecticida',cant:20,unidad:'SCO',precio:726.17,importe:15540},
-  {mes:'Mayo',fecha:'2026-05-23',folio:'AQ-13119',producto:'Elumis 12 × 1 LTO',categoria:'Herbicida',cant:15,unidad:'LTO',precio:976.42,importe:15525},
-  {mes:'Mayo',fecha:'2026-05-23',folio:'AQ-13119',producto:'Atra-Mex 90 15 × 1KG',categoria:'Herbicida',cant:8,unidad:'KGM',precio:161.32,importe:1368},
-  {mes:'Mayo',fecha:'2026-05-23',folio:'AQ-13119',producto:'Eslam ina 480 12×950ml',categoria:'Herbicida',cant:1,unidad:'LTO',precio:92.45,importe:98},
-  {mes:'Mayo',fecha:'2026-05-04',folio:'SE-3925',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD004B',categoria:'Semilla',cant:20,unidad:'SCS',precio:5865,importe:117300},
-  {mes:'Mayo',fecha:'2026-05-11',folio:'SE-3963',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD004B',categoria:'Semilla',cant:15,unidad:'SCS',precio:5865,importe:87975},
-  {mes:'Mayo',fecha:'2026-05-16',folio:'SE-4010',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD019B',categoria:'Semilla',cant:10,unidad:'SCS',precio:5865,importe:58650},
-  {mes:'Mayo',fecha:'2026-05-21',folio:'SE-4051',producto:'Maíz Salamandra ACC BW2 60M – 2V3AD986A',categoria:'Semilla',cant:10,unidad:'SCS',precio:5865,importe:58650},
-  // JUNIO
-  {mes:'Junio',fecha:'2026-06-03',folio:'AQ-13212',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:18147,importe:18147},
-  {mes:'Junio',fecha:'2026-06-04',folio:'AQ-13236',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:1492,importe:1492},
-  {mes:'Junio',fecha:'2026-06-08',folio:'AQ-13280',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:31080,importe:31080},
-  {mes:'Junio',fecha:'2026-06-10',folio:'AQ-13312',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:20157,importe:20157},
-  {mes:'Junio',fecha:'2026-06-16',folio:'AQ-13373',producto:'(Agroquímico - pendiente detalle)',categoria:'Herbicida',cant:1,unidad:'LTO',precio:3730,importe:3730},
-];
-
-const EEZYGRO = [
-  {producto:'EZ N21',lt_ha:70.0,precio_usd:5.70,nota:'Nitrógeno 21% – riego'},
-  {producto:'Eezy One',lt_ha:40.0,precio_usd:6.20,nota:'Nutrición base – riego'},
-  {producto:'Eezy Gro 9-18-9',lt_ha:16.0,precio_usd:8.01,nota:'NPK arranque – riego'},
-  {producto:'Eezy Gro 24K',lt_ha:18.0,precio_usd:9.50,nota:'17L riego + 1L Foliar 2 (V8-V10)'},
-  {producto:'Eezy Cal',lt_ha:9.0,precio_usd:9.50,nota:'Calcio – riego 7-10'},
-  {producto:'Duo Gold Mix',lt_ha:9.0,precio_usd:9.50,nota:'5L riego + 2L Foliar 1 + 2L Foliar 2'},
-  {producto:'Eezy Gro Magnesio 6%',lt_ha:2.0,precio_usd:8.20,nota:'Magnesio – riego 8-10'},
-  {producto:'Eezy Gro Fierro 10%',lt_ha:0.5,precio_usd:13.70,nota:'Hierro – riego 8'},
-  {producto:'Eezy Gro Manganeso 12%',lt_ha:0.5,precio_usd:11.50,nota:'Manganeso – riego 8'},
-  {producto:'Eezy Fulvic',lt_ha:1.0,precio_usd:7.50,nota:'Ácidos fúlvicos – riego 3-4'},
-  {producto:'Soil Pro',lt_ha:0.5,precio_usd:54.50,nota:'Mejorador suelo – riego 1'},
-  {producto:'Paquete Foliar Premium',lt_ha:1.0,precio_usd:95.00,nota:'Foliar 1 (V4-V6) + Foliar 2 (V8-V10): Boro, Zinc, Micro Plus'},
-];
-
-const RAYA = [
-  {sem:15,fechas:'6–12 abr',cant:13500,real:true},
-  {sem:16,fechas:'13–19 abr',cant:40500,real:true},
-  {sem:17,fechas:'20–26 abr',cant:43500,real:true},
-  {sem:18,fechas:'27 abr–3 may',cant:47500,real:true},
-  {sem:19,fechas:'4–10 may',cant:43870,real:true},
-  {sem:20,fechas:'11–17 may',cant:32645,real:true},
-  {sem:21,fechas:'18–24 may',cant:14000,real:true},
-  {sem:22,fechas:'25–31 may',cant:14000,real:true},
-  {sem:23,fechas:'1–7 jun',cant:14000,real:true},
-  {sem:24,fechas:'8–14 jun',cant:13500,real:true},
-  {sem:25,fechas:'15–21 jun',cant:13500,real:false},
-  {sem:26,fechas:'22–28 jun',cant:13500,real:false},
-  {sem:27,fechas:'29 jun–5 jul',cant:13500,real:false},
-  {sem:28,fechas:'6–12 jul',cant:13500,real:false},
-  {sem:29,fechas:'13–19 jul',cant:13500,real:false},
-  {sem:30,fechas:'20–26 jul',cant:13500,real:false},
-  {sem:31,fechas:'27 jul–2 ago',cant:13500,real:false},
-  {sem:32,fechas:'3–9 ago',cant:13500,real:false},
-  {sem:33,fechas:'10–16 ago',cant:13500,real:false},
-  {sem:34,fechas:'17–23 ago',cant:13500,real:false},
-  {sem:35,fechas:'24–30 ago',cant:13500,real:false},
-  {sem:36,fechas:'31 ago–6 sep',cant:13500,real:false},
-  {sem:37,fechas:'7–13 sep',cant:13500,real:false},
-  {sem:38,fechas:'14–20 sep',cant:13500,real:false},
-  {sem:39,fechas:'21–27 sep',cant:13500,real:false},
-  {sem:40,fechas:'28 sep–4 oct',cant:13500,real:false},
-  {sem:41,fechas:'5–11 oct',cant:13500,real:false},
-  {sem:42,fechas:'12–18 oct',cant:13500,real:false},
-  {sem:43,fechas:'19–25 oct',cant:13500,real:false},
-  {sem:44,fechas:'26 oct–1 nov',cant:13500,real:false},
-  {sem:45,fechas:'2–8 nov',cant:13500,real:false},
-  {sem:46,fechas:'9–15 nov',cant:13500,real:false},
-  {sem:47,fechas:'16–22 nov',cant:13500,real:false},
-  {sem:48,fechas:'23–29 nov',cant:13500,real:false},
-  {sem:49,fechas:'30 nov–6 dic',cant:13500,real:false},
-  {sem:50,fechas:'7–13 dic',cant:13500,real:false},
-  {sem:51,fechas:'14–20 dic',cant:13500,real:false},
-  {sem:52,fechas:'21–27 dic',cant:13500,real:false},
-];
-
-const INDIRECTOS = {
-  // Clasificación para la UI (sin nombres de personas en gráficas/tablas):
-  //   OPERATIVO       = montichely (cta. Banamex, gastos de campo) + sebastian (honorarios de campo) + efectivo (pagos directos de campo)
-  //   ADMINISTRATIVO  = elias (honorarios de gestión/administración)
-  // Los arrays conservan su nombre interno solo para trazabilidad de la fuente.
-  //
-  // Montichely (Banamex): cifras operativas limpias — excluyen Agrofer (ya
-  // contado aparte), compra del vehículo BYD Shark (activo, no operativo) y
-  // movimientos de trigo (sales/trilla — cultivo distinto, no maíz).
-  // Nota: el archivo de Mayo 2026 trae un total al pie ($306,478.36) que no
-  // coincide con la suma real de movimientos — error de captura, mismo patrón
-  // que el detectado en Abril 2025. Aquí se usa la suma real verificada.
-  montichely: [
-    {mes:'Abril', monto:118981.87, real:true},
-    {mes:'Mayo',  monto:221598.36, real:true},
-    {mes:'Junio', monto:124748.49, real:true, parcial:true},
-  ],
-  sebastian: [
-    {mes:'Abril',      monto:80000,  real:true},
-    {mes:'Mayo',       monto:80000,  real:true},
-    {mes:'Junio',      monto:94000,  real:true},
-    {mes:'Julio',      monto:80000,  real:false},
-    {mes:'Agosto',     monto:80000,  real:false},
-    {mes:'Septiembre', monto:80000,  real:false},
-    {mes:'Octubre',    monto:80000,  real:false},
-    {mes:'Noviembre',  monto:80000,  real:false},
-  ],
-  elias: [
-    {mes:'Abril', monto:202276.95, real:true},
-    {mes:'Mayo',  monto:69699.72,  real:true},
-  ],
-  efectivo: [
-    {fecha:'2026-04-30', concepto:'Ricardo - Cilindro y Barra',    monto:4000,  cat:'Mant. Maquinaria'},
-    {fecha:'2026-05-06', concepto:'CFE Pozo 2',                    monto:3833,  cat:'Energía'},
-    {fecha:'2026-05-08', concepto:'Ricardo - Clutch, Bomba, MO',   monto:12000, cat:'Mant. Maquinaria'},
-    {fecha:'2026-05-09', concepto:'Reconocimiento a Coco',         monto:500,   cat:'Varios'},
-    {fecha:'2026-05-23', concepto:'Ricardo - Camisa',              monto:6000,  cat:'Mant. Maquinaria'},
-    {fecha:'2026-06-09', concepto:'Maquilas de alfalfa',           monto:29000, cat:'Maquinaria Rentada'},
-    {fecha:'2026-06-10', concepto:'Dron',                          monto:1000,  cat:'Maquinaria Rentada'},
-    {fecha:'2026-06-10', concepto:'Coco - comidas (dron)',         monto:200,   cat:'Varios'},
-  ]
-};
-
-// ── Comparativo Ciclos: Convencional 2025 vs EazyGro 2026 (base 71 ha) ──
-const COMPARATIVO = {
-  ha: 71,
-  convencional2025: [
-    {producto:'Mezcla 18-12-05 + Mic',        cant:'32 ton',      costo:461024,   costoHa:6493.30},
-    {producto:'Urea granular 46-00-00',       cant:'34 ton',      costo:576300,   costoHa:8116.90},
-    {producto:'YaraVera AMIDAS',              cant:'12 ton',      costo:516000,   costoHa:7267.61},
-    {producto:'N-28',                         cant:'9,900 kg/L',  costo:277200,   costoHa:3904.23},
-    {producto:'Sulfato de amonio estándar',   cant:'0.15 ton',    costo:1601,     costoHa:22.54},
-    {producto:'Sulfato de magnesio',          cant:'3.65 ton',    costo:32722,    costoHa:460.88},
-    {producto:'Nitrato de calcio / Calcinit', cant:'5.65 ton',    costo:83055,    costoHa:1169.79},
-    {producto:'NKS / fuente potásica',        cant:'4 ton',       costo:97600,    costoHa:1374.65},
-    {producto:'Ultrasol NKS Plus HG',         cant:'2.525 ton',   costo:61863,    costoHa:871.30},
-  ],
-  eezygro2026: [
-    {producto:'EZ-N21',                       cant:'3,120 L',     costo:309260,   costoHa:4355.78},
-    {producto:'Eezy One',                     cant:'3,120 L',     costo:336388,   costoHa:4737.86},
-    {producto:'Eezy Gro 24K',                 cant:'1,000 L',     costo:165203,   costoHa:2326.80},
-    {producto:'Eezy Gro 9-18-9',              cant:'1,040 L',     costo:144864,   costoHa:2040.34},
-    {producto:'Paquete Nutricional Premium',  cant:'83 pz',       costo:137119,   costoHa:1931.25},
-    {producto:'Eezy Cal',                     cant:'520 L',       costo:85906,    costoHa:1209.94},
-    {producto:'Soil Pro',                     cant:'40 L',        costo:37910,    costoHa:533.94},
-    {producto:'Duo Gold Mix',                 cant:'300 L',       costo:49561,    costoHa:698.04},
-    {producto:'Eezy Gro Fierro',              cant:'29 L',        costo:6492,     costoHa:91.43},
-    {producto:'Eezy Gro Manganeso',           cant:'29 L',        costo:5452,     costoHa:76.78},
-    {producto:'Eezy Fulvic',                  cant:'60 L',        costo:7825,     costoHa:110.22},
-    {producto:'Eezy Gro Magnesio',            cant:'29 L',        costo:3888,     costoHa:54.77},
-    {producto:'Eezy cañ',                     cant:'2 pz',        costo:362,      costoHa:5.09},
-  ]
-};
-
-// ── Gastos Indirectos 2025 (Montichely) — desglosado por área ──
-// Fuente: estados de cuenta Banamex/Monex Abr-Dic 2025. Excluye Agrofer (ya
-// contado en hoja AGROFER), préstamos Elías↔Montichely y ventas/rentas (ingresos).
-const INDIRECTOS_2025 = {
-  porCategoria: [
-    {cat:'Combustibles',                    monto:454421},
-    {cat:'Maquinaria Rentada / Trilla',     monto:399700},
-    {cat:'Nómina y Seguridad Social',       monto:370957},
-    {cat:'Tarjetas de Crédito (varios)',    monto:332513},
-    {cat:'Mantenimiento y Refacciones',     monto:311061},
-    {cat:'Abono Orgánico (servicio externo)', monto:173002},
-    {cat:'Agroquímicos / Insumos Varios',   monto:152419},
-    {cat:'Energía (CFE)',                   monto:131079},
-    {cat:'Contabilidad',                    monto:42340},
-    {cat:'Otros / Varios',                  monto:31655},
-    {cat:'Telecomunicaciones',              monto:25389},
-    {cat:'Legal / Notarial',                monto:24870},
-    {cat:'Seguros',                         monto:14466},
-    {cat:'Impuestos (SAT)',                 monto:14196},
-    {cat:'Comisiones Bancarias',            monto:5115},
-  ],
-  porMes: [
-    {mes:'Abril',      monto:443622, nota:null},
-    {mes:'Mayo',       monto:145729, nota:null},
-    {mes:'Junio',      monto:419003, nota:null},
-    {mes:'Julio',      monto:242609, nota:null},
-    {mes:'Agosto',     monto:88862,  nota:null},
-    {mes:'Septiembre', monto:63406,  nota:null},
-    {mes:'Octubre',    monto:101529, nota:null},
-    {mes:'Noviembre',  monto:311836, nota:null},
-    {mes:'Diciembre',  monto:666589, nota:null},
-  ]
-};
-
-/* ═══════════════════════════════════════════
-   UTILS
-═══════════════════════════════════════════ */
-const fmt = v => '$' + Number(v).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});
-const fmtD = v => '$' + Number(v).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-
-const BADGE_CLASS = {
-  'Semilla':'b-semilla','Fertilizante':'b-fertilizante','Herbicida':'b-herbicida',
-  'Insecticida':'b-insecticida','Fungicida':'b-fungicida','Adyuvante':'b-adyuvante'
-};
-
-/* ═══════════════════════════════════════════
-   TABS
-═══════════════════════════════════════════ */
-let activeCharts = {};
-function switchTab(idx, btn) {
-  for (let i = 0; i < 7; i++) {
-    const el = document.getElementById('tab' + i);
-    if (el) el.style.display = i === idx ? 'block' : 'none';
-  }
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('tab-active', i === idx);
-    b.classList.toggle('tab-inactive', i !== idx);
+function renderParamRows(containerId, idPrefix, labelsMeta, valuesObj, onChange){
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = "";
+  Object.keys(labelsMeta).forEach(key=>{
+    const meta = labelsMeta[key];
+    const row = document.createElement("div");
+    row.className = "param-row";
+    row.innerHTML = `
+      <div class="param-label">${meta.label}</div>
+      <div class="stepper">
+        <button type="button" data-key="${key}" data-dir="-1" aria-label="Disminuir ${meta.label}">−</button>
+        <input type="number" inputmode="decimal" id="${idPrefix}-${key}" value="${valuesObj[key]}" step="${meta.step}">
+        <button type="button" data-key="${key}" data-dir="1" aria-label="Aumentar ${meta.label}">+</button>
+      </div>
+      <div class="unit">${meta.unit}</div>
+    `;
+    cont.appendChild(row);
   });
-  setTimeout(() => {
-    if (idx === 0) initResumenCharts();
-    if (idx === 1) renderFacturasTable(FACTURAS);
-    if (idx === 2) { renderEezyGroTable(); initEezyGroChart(); }
-    if (idx === 3) { renderRayaTable(); initRayaDetalleChart(); }
-    if (idx === 4) initCostoHaChart();
-    if (idx === 5) { renderIndirectosTable(); initIndirectosCharts(); }
-    if (idx === 6) { renderComparativoTables(); initComparativoCharts(); renderIndirectos2025Tables(); initIndirectos2025Charts(); }
-  }, 50);
-}
-
-/* ═══════════════════════════════════════════
-   CHART FACTORY
-═══════════════════════════════════════════ */
-function makeChart(id, type, labels, datasets, opts = {}) {
-  const ctx = document.getElementById(id);
-  if (!ctx) return;
-  if (activeCharts[id]) { activeCharts[id].destroy(); }
-  const TC_DIM = '#7a9485';
-  const TC_GRID = '#d0e4d833';
-  const defaults = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 12 } },
-      tooltip: { backgroundColor: '#ffffff', borderColor: '#d0e4d8', borderWidth: 1, titleColor: '#14291e', bodyColor: '#14291e', boxShadow: '0 4px 12px rgba(0,0,0,.1)' }
-    },
-    scales: type === 'bar' || type === 'line' ? {
-      x: { ticks: { color: TC_DIM, font: { size: 11 } }, grid: { color: TC_GRID } },
-      y: { ticks: { color: TC_DIM, font: { size: 11 }, callback: v => '$' + (v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v) }, grid: { color: TC_GRID } }
-    } : {}
-  };
-  activeCharts[id] = new Chart(ctx, { type, data: { labels, datasets }, options: Object.assign(defaults, opts) });
-}
-
-/* ═══════════════════════════════════════════
-   RESUMEN CHARTS
-═══════════════════════════════════════════ */
-function initResumenCharts() {
-  const TC_DIM = '#7a9485';
-  const TC_GRID = '#d0e4d833';
-
-  // Monthly bar – Agrofer + EazyGro (MXN)
-  makeChart('chartMensual', 'bar',
-    ['Abril', 'Mayo', 'Junio'],
-    [
-      {
-        label: 'Agrofer MXN',
-        data: [952908, 483963, 19639],
-        backgroundColor: '#c27a0944', borderColor: '#c27a09', borderWidth: 1, borderRadius: 4
-      },
-      {
-        label: 'EazyGro MXN',
-        data: [0, 1075025, 215219],
-        backgroundColor: '#15803d44', borderColor: '#15803d', borderWidth: 1, borderRadius: 4
-      }
-    ],
-    {
-      plugins: { legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } },
-      scales: {
-        x: { ticks: { color: TC_DIM, font: { size: 11 } }, grid: { color: TC_GRID } },
-        y: { ticks: { color: TC_DIM, font: { size: 11 }, callback: v => '$' + (v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v) }, grid: { color: '#d0e4d844' } }
-      }
-    }
-  );
-
-  // Category donut – Fertilizante includes Terratec + EazyGro recibido
-  const catData = [850425, 1751268, 72331, 52890, 8352, 2445];
-  makeChart('chartCategoria', 'doughnut',
-    ['Semilla', 'Fertilizante (Terratec + EazyGro)', 'Herbicidas', 'Insecticidas', 'Adyuvantes', 'Fungicidas'],
-    [{
-      data: catData,
-      backgroundColor: ['#15803d55','#c27a0955','#0369a155','#6d28d955','#0e7a7055','#b91c1c55'],
-      borderColor: ['#15803d','#c27a09','#0369a1','#6d28d9','#0e7a70','#b91c1c'], borderWidth: 2
-    }],
-    { plugins: { legend: { position: 'right', labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } } }
-  );
-
-  // Top products
-  const topProds = [
-    {n: 'Semilla Maíz Salamandra', v: 850425},
-    {n: 'Terratec 18-12-05 + MIC', v: 461024},
-    {n: 'Barazo T 5G (insecticida)', v: 46620},
-    {n: 'Dracolor (herbicida)', v: 25600},
-    {n: 'Elumis (herbicida)', v: 15525},
-    {n: 'Picador 70 PH', v: 14924},
-    {n: 'Laudis + Dyne-Amic', v: 7170},
-    {n: 'Harness Xtra', v: 5600},
-    {n: 'Carrier (adyuvante)', v: 5472},
-    {n: 'Coach 90 WDG', v: 4370},
-  ];
-  makeChart('chartTopProds', 'bar',
-    topProds.map(p => p.n.length > 22 ? p.n.slice(0,22)+'…' : p.n),
-    [{
-      label: 'Importe MXN', data: topProds.map(p => p.v), indexAxis: 'y',
-      backgroundColor: '#c27a0933', borderColor: '#c27a09', borderWidth: 1, borderRadius: 3
-    }],
-    { indexAxis: 'y', plugins: { legend: { display: false } }, scales: {
-      x: { ticks: { color: TC_DIM, font:{size:10}, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: TC_GRID } },
-      y: { ticks: { color: '#14291e', font: { size: 10 } }, grid: { display: false } }
-    }}
-  );
-
-  // Raya weekly (only real weeks)
-  const rayaReal = RAYA.filter(r => r.real);
-  makeChart('chartRaya', 'bar',
-    rayaReal.map(r => 'Sem '+r.sem),
-    [{
-      label: 'Pago semanal', data: rayaReal.map(r => r.cant),
-      backgroundColor: '#4d7c0f44', borderColor: '#4d7c0f', borderWidth: 1, borderRadius: 4
-    }],
-    {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: TC_DIM, font: { size: 10 } }, grid: { color: TC_GRID } },
-        y: { ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#d0e4d844' } }
-      }
-    }
-  );
-
-  // Top 10 fertilizantes (Agrofer + EazyGro · base 80 ha)
-  const topFert = [
-    {n: 'EZ N21',                  v: 555089, src: 'EazyGro'},
-    {n: 'Terratec 18-12-05 + MIC', v: 461024, src: 'Agrofer'},
-    {n: 'Eezy One',                v: 345018, src: 'EazyGro'},
-    {n: 'Eezy Gro 24K',            v: 237895, src: 'EazyGro'},
-    {n: 'Eezy Gro 9-18-9',         v: 178296, src: 'EazyGro'},
-    {n: 'Paquete Foliar Premium',   v: 132164, src: 'EazyGro'},
-    {n: 'Eezy Cal',                v: 118948, src: 'EazyGro'},
-    {n: 'Duo Gold Mix',            v: 118948, src: 'EazyGro'},
-    {n: 'Soil Pro',                v:  37910, src: 'EazyGro'},
-    {n: 'Eezy Gro Magnesio 6%',    v:  22816, src: 'EazyGro'},
-  ];
-  makeChart('chartTopFertilizantes', 'bar',
-    topFert.map(p => p.n),
-    [{
-      label: 'Importe MXN',
-      data: topFert.map(p => p.v),
-      indexAxis: 'y',
-      backgroundColor: topFert.map(p => p.src === 'Agrofer' ? '#c27a0933' : '#15803d33'),
-      borderColor:     topFert.map(p => p.src === 'Agrofer' ? '#c27a09'   : '#15803d'),
-      borderWidth: 1, borderRadius: 3
-    }],
-    {
-      indexAxis: 'y',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            afterLabel: ctx => topFert[ctx.dataIndex].src === 'Agrofer' ? '  Proveedor: Agrofer' : '  Proveedor: EazyGro'
-          }
-        }
-      },
-      scales: {
-        x: { ticks: { color: TC_DIM, font:{size:10}, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: TC_GRID } },
-        y: { ticks: { color: '#14291e', font: { size: 11 } }, grid: { display: false } }
-      }
-    }
-  );
-}
-
-/* ═══════════════════════════════════════════
-   FACTURAS TABLE
-═══════════════════════════════════════════ */
-function renderFacturasTable(data) {
-  const tbody = document.getElementById('facturasTbody');
-  if (!tbody) return;
-  tbody.innerHTML = data.map(r => `
-    <tr>
-      <td style="color:var(--text-dim);font-size:12px;">${r.mes}</td>
-      <td style="font-size:12px;font-family:'JetBrains Mono',monospace;">${r.fecha}</td>
-      <td style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--amber);">${r.folio}</td>
-      <td style="font-size:12px;max-width:240px;">${r.producto}</td>
-      <td><span class="badge ${BADGE_CLASS[r.categoria]||'b-herbicida'}">${r.categoria}</span></td>
-      <td class="num" style="font-size:12px;">${r.cant.toLocaleString()}</td>
-      <td style="font-size:11px;color:var(--text-dim);">${r.unidad}</td>
-      <td class="num" style="font-size:12px;">${fmtD(r.precio)}</td>
-      <td class="num" style="font-size:13px;font-weight:600;color:var(--text-bright);">${fmt(r.importe)}</td>
-    </tr>`).join('');
-  const total = data.reduce((s, r) => s + r.importe, 0);
-  const el = document.getElementById('facturasTotal');
-  if (el) el.textContent = fmt(total);
-  const c = document.getElementById('f-count');
-  if (c) c.textContent = data.length;
-}
-
-function filterFacturas() {
-  const mes = document.getElementById('f-mes').value;
-  const cat = document.getElementById('f-cat').value;
-  const bus = (document.getElementById('f-buscar').value || '').toLowerCase();
-  const filtered = FACTURAS.filter(r =>
-    (!mes || r.mes === mes) &&
-    (!cat || r.categoria === cat) &&
-    (!bus || r.producto.toLowerCase().includes(bus) || r.folio.toLowerCase().includes(bus))
-  );
-  renderFacturasTable(filtered);
-}
-
-/* ═══════════════════════════════════════════
-   EEZYGRO TABLE
-═══════════════════════════════════════════ */
-function renderEezyGroTable() {
-  const tbody = document.getElementById('eezygroTbody');
-  if (!tbody) return;
-  tbody.innerHTML = EEZYGRO.map(p => {
-    const usd_ha = p.lt_ha * p.precio_usd;
-    const mxn_ha = usd_ha * TC;
-    const usd_83 = usd_ha * HA;
-    const mxn_83 = mxn_ha * HA;
-    return `<tr>
-      <td style="font-size:13px;">${p.producto} <span style="font-size:11px;color:var(--text-dim);">— ${p.nota}</span></td>
-      <td class="num" style="font-size:13px;">${p.lt_ha}</td>
-      <td class="num" style="font-size:13px;">$${p.precio_usd.toFixed(2)}</td>
-      <td class="num" style="font-size:13px;color:var(--blue);">$${usd_ha.toFixed(2)}</td>
-      <td class="num" style="font-size:13px;color:var(--amber);">${fmt(mxn_ha)}</td>
-      <td class="num" style="font-size:13px;color:var(--blue);">$${usd_83.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
-      <td class="num" style="font-size:13px;font-weight:600;color:var(--text-bright);">${fmt(mxn_83)}</td>
-    </tr>`;
-  }).join('');
-}
-
-function initEezyGroChart() {
-  const labels = EEZYGRO.map(p => p.producto);
-  const vals = EEZYGRO.map(p => p.lt_ha * p.precio_usd * TC * HA);
-  const colors = ['#15803d55','#15803d44','#4d7c0f55','#4d7c0f44','#c27a0955','#0369a155','#6d28d955','#0e7a7055','#b91c1c55','#6b280055','#d9770655','#05966955'];
-  makeChart('chartEezyGro','bar',labels,[{
-    label:`Total ${HA} ha MXN`, data:vals,
-    backgroundColor:colors, borderColor:colors.map(c=>c.slice(0,-2)+'ff'), borderWidth:1, borderRadius:4
-  }],{plugins:{legend:{display:false}},scales:{
-    x:{ticks:{color:'#7a9485',font:{size:10}},grid:{color:'#d0e4d833'}},
-    y:{ticks:{color:'#7a9485',font:{size:10},callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'#d0e4d844'}}
-  }});
-}
-
-/* ═══════════════════════════════════════════
-   RAYA TABLE
-═══════════════════════════════════════════ */
-function renderRayaTable() {
-  const tbody = document.getElementById('rayaTbody');
-  if (!tbody) return;
-  let acum = 0;
-  tbody.innerHTML = RAYA.map(r => {
-    acum += r.cant;
-    return `<tr>
-      <td class="mono" style="font-size:12px;color:var(--text-dim);">${r.sem}</td>
-      <td style="font-size:12px;">${r.fechas}</td>
-      <td class="num" style="font-size:13px;color:${r.real?'var(--lime)':'var(--text-dim)'};">${fmt(r.cant)}</td>
-      <td class="num" style="font-size:12px;color:var(--text-dim);">${fmt(acum)}</td>
-      <td><span class="badge ${r.real?'b-real':'b-proy'}">${r.real?'Real':'Proyectado'}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function initRayaDetalleChart() {
-  const labels = RAYA.map(r => 'Sem '+r.sem);
-  const cantData = RAYA.map(r => r.cant);
-  let acum = 0;
-  const acumData = RAYA.map(r => { acum += r.cant; return acum; });
-  makeChart('chartRayaDetalle','bar', labels,[
-    {label:'Pago semanal',data:cantData,backgroundColor:RAYA.map(r=>r.real?'#4d7c0f44':'#4d7c0f22'),borderColor:RAYA.map(r=>r.real?'#4d7c0f':'#4d7c0f55'),borderWidth:1,borderRadius:3,yAxisID:'y'},
-    {label:'Acumulado',data:acumData,type:'line',borderColor:'#c27a09',backgroundColor:'#c27a0911',borderWidth:2,pointRadius:0,yAxisID:'y1',fill:true,tension:.4}
-  ],{plugins:{legend:{labels:{color:'#7a9485',font:{size:11},boxWidth:10}}},scales:{
-    x:{ticks:{color:'#7a9485',font:{size:9}},grid:{color:'#d0e4d833'}},
-    y:{ticks:{color:'#4d7c0f',font:{size:9},callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'#d0e4d844'},position:'left'},
-    y1:{ticks:{color:'#c27a09',font:{size:9},callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{display:false},position:'right'}
-  }});
-}
-
-/* ═══════════════════════════════════════════
-   COSTO POR HA CHART
-═══════════════════════════════════════════ */
-function initCostoHaChart() {
-  const conceptos = ['Semilla','Terratec 18-12-05','EazyGro prog.','Herbicidas','Insecticidas','Raya rancho','Otros'];
-  const vals = [10246, 5554, 22188, 1024, 783, 7892, 157];
-  const colors = ['#15803d55','#c27a0955','#0369a155','#0284c755','#6d28d955','#4d7c0f55','#0e7a7055'];
-  makeChart('chartCostoHa','bar',conceptos,[{
-    label:'MXN / ha',data:vals,
-    backgroundColor:colors,borderColor:colors.map(c=>c.slice(0,-2)+'ff'),borderWidth:1,borderRadius:5
-  }],{plugins:{legend:{display:false}},scales:{
-    x:{ticks:{color:'#14291e',font:{size:11}},grid:{display:false}},
-    y:{ticks:{color:'#7a9485',font:{size:10},callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'#d0e4d844'}}
-  }});
-}
-
-/* ═══════════════════════════════════════════
-   FILE UPLOAD
-═══════════════════════════════════════════ */
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      if (ext === 'csv') {
-        parseCSV(e.target.result, file.name);
-      } else {
-        const wb = XLSX.read(e.target.result, { type: 'binary', cellDates: true });
-        detectAndLoad(wb, file.name);
-      }
-    } catch(err) {
-      showStatus('Error al leer el archivo: ' + err.message, false);
-    }
-  };
-  if (ext === 'csv') reader.readAsText(file);
-  else reader.readAsBinaryString(file);
-  event.target.value = '';
-}
-
-function detectAndLoad(wb, filename) {
-  const sheetNames = wb.SheetNames.join(' ').toLowerCase();
-  const firstSheetData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
-  const flatText = firstSheetData.flat().join(' ').toLowerCase();
-
-  if (flatText.includes('raya global') || flatText.includes('n° semana')) {
-    loadRayaFromWB(wb, filename);
-  } else if (flatText.includes('relación facturas') || flatText.includes('facturas abril') || flatText.includes('julio santillan')) {
-    loadFacturasFromWB(wb, filename);
-  } else if (flatText.includes('ez-n21') || flatText.includes('eezy') || flatText.includes('eazykgro') || flatText.includes('ez n21')) {
-    loadEezyGroFromWB(wb, filename);
-  } else if (flatText.includes('partidas de productos') || flatText.includes('importe total partida')) {
-    loadMaestroFromWB(wb, filename);
-  } else {
-    showStatus('Archivo cargado: ' + filename + ' (sin datos reconocidos automáticamente)', true);
-  }
-}
-
-function loadFacturasFromWB(wb, filename) {
-  let found = 0;
-  wb.SheetNames.forEach(name => {
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, defval:''});
-    rows.forEach(row => {
-      const folio = (row[1]||'').toString().trim();
-      const fecha = row[2];
-      const importe = parseFloat(row[3]) || 0;
-      if (folio && importe > 0) found++;
+  cont.querySelectorAll("button[data-key]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const key = btn.dataset.key;
+      const dir = parseFloat(btn.dataset.dir);
+      const meta = labelsMeta[key];
+      let v = valuesObj[key] + dir*meta.step;
+      if(v < meta.min) v = meta.min;
+      v = Math.round(v*1000)/1000;
+      valuesObj[key] = v;
+      document.getElementById(`${idPrefix}-${key}`).value = v;
+      onChange();
     });
   });
-  showStatus('Facturas Agrofer actualizadas desde ' + filename + ' (' + found + ' registros)', true);
-  document.getElementById('updateLabel').textContent = 'Actualizado: ' + new Date().toLocaleDateString('es-MX');
-}
-
-function loadRayaFromWB(wb, filename) {
-  let updated = 0;
-  wb.SheetNames.forEach(sheetName => {
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {header:1, defval:''});
-    rows.forEach(row => {
-      const sem = parseInt(row[0]);
-      const cant = parseFloat(row[2]) || 0;
-      if (sem >= 15 && sem <= 52 && cant > 0) {
-        const idx = RAYA.findIndex(r => r.sem === sem);
-        if (idx >= 0) { RAYA[idx].cant = cant; updated++; }
-      }
+  Object.keys(labelsMeta).forEach(key=>{
+    document.getElementById(`${idPrefix}-${key}`).addEventListener("input", e=>{
+      const v = parseFloat(e.target.value);
+      valuesObj[key] = isNaN(v) ? 0 : v;
+      onChange();
     });
   });
-  if (updated > 0) {
-    renderRayaTable();
-    if (activeCharts['chartRayaDetalle']) { activeCharts['chartRayaDetalle'].destroy(); delete activeCharts['chartRayaDetalle']; }
-    initRayaDetalleChart();
-    showStatus('Raya actualizada desde ' + filename + ' (' + updated + ' semanas)', true);
-  } else {
-    showStatus('Sin cambios detectados en raya', false);
+}
+
+/* ---------- FERTILIZACIÓN ---------- */
+const fertDEFAULTS = {
+  pulpo:     { ancho:1, surcos:6, largo:519, kgha:300 },
+  voleadora: { ancho:1, surcos:6, largo:519, kgha:300 }
+};
+const fertLABELS = {
+  ancho: { label:"Ancho de surco",  unit:"mt",    step:0.05, min:0 },
+  surcos:{ label:"N° de surcos",    unit:"",      step:1,    min:1 },
+  largo: { label:"Largo de tabla",  unit:"mt",    step:1,    min:0 },
+  kgha:  { label:"Kg por hectárea", unit:"kg/ha", step:5,    min:0 }
+};
+const FERT_N_VUELTAS = 8;
+let fertTipo = "pulpo";
+let fertVal = { ...fertDEFAULTS.pulpo };
+
+function renderFertParams(){
+  renderParamRows("params-fert", "in-fert", fertLABELS, fertVal, renderFertStrip);
+}
+function renderFertStrip(){
+  const strip = document.getElementById("strip-fert");
+  strip.innerHTML = "";
+  const { ancho, surcos, largo, kgha } = fertVal;
+  const areaVuelta = ancho * surcos * largo * 2;
+  const kgVuelta = areaVuelta * kgha / 10000;
+  const porBoteVuelta = kgVuelta / 4;
+  for(let n=1;n<=FERT_N_VUELTAS;n++){
+    const card = document.createElement("div");
+    card.className = "vuelta-card";
+    card.innerHTML = `
+      <div class="vuelta-num">${n}<span>vta${n>1?"s":""}</span></div>
+      <div class="metric"><div class="m-label">Kg acumulados</div><div class="m-value">${fmt(kgVuelta*n,1)} <small>kg</small></div></div>
+      <div class="metric"><div class="m-label">Por bote</div><div class="m-value">${fmt(porBoteVuelta*n,1)} <small>kg</small></div></div>
+    `;
+    strip.appendChild(card);
   }
 }
 
-function loadEezyGroFromWB(wb, filename) {
-  showStatus('EazyGro recargado desde ' + filename, true);
-  document.getElementById('updateLabel').textContent = 'Actualizado: ' + new Date().toLocaleDateString('es-MX');
+/* ---------- FUMIGACIÓN ---------- */
+const fumDEFAULTS = {
+  herbicidas:   { boquillas:20, sep:0.5, ancho:1, area:2, largo:521, litros:600 },
+  agroquimicos: { boquillas:10, sep:1,   ancho:1, area:2, largo:300, litros:600 }
+};
+const fumLABELS = {
+  boquillas:{ label:"N° de boquillas",      unit:"",   step:1,    min:1 },
+  sep:      { label:"Separación boquilla",  unit:"mt", step:0.05, min:0 },
+  ancho:    { label:"Ancho de surco",       unit:"mt", step:0.05, min:0 },
+  largo:    { label:"Largo de tabla",       unit:"mt", step:1,    min:0 },
+  litros:   { label:"Capacidad del tanque", unit:"lt", step:10,   min:0 },
+  area:     { label:"Área deseada",         unit:"ha", step:0.5,  min:0 }
+};
+let fumTipo = "herbicidas";
+let fumVal = { ...fumDEFAULTS.herbicidas };
+
+function renderFumParams(){
+  renderParamRows("params-fum", "in-fum", fumLABELS, fumVal, renderFumResults);
+}
+function renderFumResults(){
+  const { boquillas, sep, ancho, largo, litros, area } = fumVal;
+  const numSurcos = ancho>0 ? (boquillas*sep/ancho) : 0;
+  const entradaM2 = boquillas*sep*largo;
+  const litrosEntrada = entradaM2>0 ? (entradaM2*litros/20000) : 0;
+  const gastoVueltaM2 = entradaM2*2;
+  const gastoVueltaLitros = litrosEntrada*2;
+  const totalEntradas = entradaM2>0 ? (area*10000/entradaM2) : 0;
+  const vueltasNecesarias = totalEntradas/2;
+  const vueltasRedondeo = Math.max(1, Math.ceil(vueltasNecesarias || 0));
+
+  document.getElementById("summary-fum").innerHTML = `
+    <div class="summary-cell"><div class="s-label">N° de surcos</div><div class="s-value">${fmt(numSurcos,1)}</div></div>
+    <div class="summary-cell"><div class="s-label">1 entrada</div><div class="s-value">${fmt(entradaM2,0)} <small>m²</small></div></div>
+    <div class="summary-cell"><div class="s-label">Gasto por vuelta</div><div class="s-value">${fmt(gastoVueltaLitros,1)} <small>lt</small></div></div>
+    <div class="summary-cell"><div class="s-label">Litros por entrada</div><div class="s-value">${fmt(litrosEntrada,1)} <small>lt</small></div></div>
+    <div class="summary-cell wide highlight"><div class="s-label">Vueltas necesarias para ${fmt(area,1)} ha</div><div class="s-value">${fmt(vueltasNecesarias,1)} <small>vueltas</small></div></div>
+  `;
+
+  const strip = document.getElementById("strip-fum");
+  strip.innerHTML = "";
+  let yaMarcado = false;
+  for(let n=1;n<=vueltasRedondeo;n++){
+    const areaAcumHa = gastoVueltaM2*n/10000;
+    const litrosAcum = gastoVueltaLitros*n;
+    const cubre = !yaMarcado && areaAcumHa >= area;
+    if(cubre) yaMarcado = true;
+    const card = document.createElement("div");
+    card.className = "vuelta-card" + (cubre ? " done" : "");
+    card.innerHTML = `
+      ${cubre ? '<div class="badge">Cubre el área</div>' : ""}
+      <div class="vuelta-num">${n}<span>vta${n>1?"s":""}</span></div>
+      <div class="metric"><div class="m-label">Área cubierta</div><div class="m-value">${fmt(areaAcumHa,2)} <small>ha</small></div></div>
+      <div class="metric"><div class="m-label">Litros gastados</div><div class="m-value">${fmt(litrosAcum,1)} <small>lt</small></div></div>
+    `;
+    strip.appendChild(card);
+  }
 }
 
-function loadMaestroFromWB(wb, filename) {
-  showStatus('Maestro facturas recargado desde ' + filename, true);
-  document.getElementById('updateLabel').textContent = 'Actualizado: ' + new Date().toLocaleDateString('es-MX');
-}
+/* ---------- SEMBRADORA ---------- */
+const sembDEFAULTS = {
+  trigo:  { ancho:2.25, surcos:1, largo:603, abono:350, semilla:170 },
+  cebada: { ancho:2.25, surcos:1, largo:603, abono:350, semilla:170 },
+  maiz:   { ancho:0.75, surcos:4, largo:567, abono:500, semilla:90000 },
+  sorgo:  { ancho:0.75, surcos:4, largo:300, abono:400, semilla:20 }
+};
+const SEED_FIELD = {
+  trigo:  { label:"Semilla por hectárea",  unit:"kg/ha",       step:0.1,  mode:"kg" },
+  cebada: { label:"Semilla por hectárea",  unit:"kg/ha",       step:0.1,  mode:"kg" },
+  maiz:   { label:"Semillas por hectárea", unit:"semillas/ha", step:1000, mode:"count" },
+  sorgo:  { label:"Semilla por hectárea",  unit:"kg/ha",       step:0.1,  mode:"kg" }
+};
+const SEMB_N_VUELTAS = 12;
+let sembTipo = "trigo";
+let sembVal = { ...sembDEFAULTS.trigo };
 
-function parseCSV(text, filename) {
-  showStatus('CSV cargado: ' + filename + '. Use formato .xlsx para carga automática.', true);
-}
-
-function showStatus(msg, ok) {
-  const el = document.getElementById('uploadStatus');
-  el.textContent = msg;
-  el.style.display = 'block';
-  el.style.background = ok ? '#14532d44' : '#7f1d1d44';
-  el.style.color = ok ? '#4ade80' : '#f87171';
-  el.style.border = '1px solid ' + (ok ? '#14532d' : '#991b1b');
-  setTimeout(() => { el.style.display = 'none'; }, 5000);
-}
-
-/* ═══════════════════════════════════════════
-   GASTOS INDIRECTOS
-═══════════════════════════════════════════ */
-function renderIndirectosTable() {
-  // Monthly summary table — Operativo (=Sebastián) | Administrativo (=Elías) | Gastos Indirectos (=Montichely+Efectivo)
-  const allMonths = ['Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre'];
-  const tbody = document.getElementById('indMensualTbody');
-  if (!tbody) return;
-
-  const getMonto = (arr, mes) => (arr.find(r=>r.mes===mes)||{monto:0}).monto;
-  const isReal   = (arr, mes) => !!arr.find(r=>r.mes===mes && r.real);
-
-  // Pagos directos: split across months by date
-  const efAbr = INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-04')).reduce((s,e)=>s+e.monto,0);
-  const efMay = INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-05')).reduce((s,e)=>s+e.monto,0);
-  const efJun = INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-06')).reduce((s,e)=>s+e.monto,0);
-  const efByMes = {Abril:efAbr,Mayo:efMay,Junio:efJun};
-
-  tbody.innerHTML = allMonths.map(mes => {
-    const operativo = getMonto(INDIRECTOS.sebastian, mes);
-    const administrativo = getMonto(INDIRECTOS.elias, mes);
-    const m = getMonto(INDIRECTOS.montichely, mes);
-    const ef = efByMes[mes]||0;
-    const gastosIndirectos = m + ef;
-    const total = operativo + administrativo + gastosIndirectos;
-    if (total === 0) return '';
-
-    // Determine if real or projected
-    const anyReal = isReal(INDIRECTOS.montichely, mes) || isReal(INDIRECTOS.sebastian, mes) || isReal(INDIRECTOS.elias, mes) || ef > 0;
-    const allReal = m > 0 ? isReal(INDIRECTOS.montichely, mes) : true;
-    const badge = anyReal && allReal ? '<span class="badge b-real">Real</span>' : '<span class="badge b-proy">Proyectado</span>';
-
-    return `<tr>
-      <td style="font-size:13px;font-weight:500;">${mes}</td>
-      <td class="num" style="font-size:13px;color:${operativo?'var(--blue)':'var(--text-dim)'};">${operativo?fmt(operativo):'—'}</td>
-      <td class="num" style="font-size:13px;color:${administrativo?'var(--lime)':'var(--text-dim)'};">${administrativo?fmt(administrativo):'—'}</td>
-      <td class="num" style="font-size:13px;color:${gastosIndirectos?'var(--text-bright)':'var(--text-dim)'};">${gastosIndirectos?fmt(gastosIndirectos):'—'}</td>
-      <td class="num" style="font-size:14px;font-weight:600;color:var(--amber);">${fmt(total)}</td>
-      <td>${badge}</td>
-    </tr>`;
-  }).join('');
-
-  // Efectivo detail table
-  const efbody = document.getElementById('efectivoTbody');
-  if (!efbody) return;
-  const BADGE_EF = {
-    'Mant. Maquinaria':'b-insecticida','Energía':'b-fertilizante',
-    'Maquinaria Rentada':'b-herbicida','Varios':'b-adyuvante'
+function getSembLabels(tipo){
+  const seed = SEED_FIELD[tipo];
+  return {
+    ancho:  { label:"Ancho de surco",       unit:"mt",   step:0.05, min:0 },
+    surcos: { label:"N° de surcos",         unit:"",     step:1,    min:1 },
+    largo:  { label:"Largo de tabla",       unit:"mt",   step:1,    min:0 },
+    abono:  { label:"Abono por hectárea",   unit:"kg/ha",step:5,    min:0 },
+    semilla:{ label:seed.label,             unit:seed.unit, step:seed.step, min:0 }
   };
-  efbody.innerHTML = INDIRECTOS.efectivo.map(e => `
-    <tr>
-      <td class="mono" style="font-size:12px;color:var(--text-dim);">${e.fecha}</td>
-      <td style="font-size:13px;">${e.concepto}</td>
-      <td><span class="badge ${BADGE_EF[e.cat]||'b-semilla'}">${e.cat}</span></td>
-      <td class="num" style="font-size:13px;font-weight:600;color:var(--text-bright);">${fmt(e.monto)}</td>
-    </tr>`).join('');
 }
-
-function initIndirectosCharts() {
-  const meses = ['Abril','Mayo','Junio','Julio','Ago','Sep','Oct','Nov'];
-
-  const efByMes = {
-    Abril: INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-04')).reduce((s,e)=>s+e.monto,0),
-    Mayo:  INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-05')).reduce((s,e)=>s+e.monto,0),
-    Junio: INDIRECTOS.efectivo.filter(e=>e.fecha.startsWith('2026-06')).reduce((s,e)=>s+e.monto,0),
-  };
-
-  const allMonths = ['Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre'];
-  const getMonto = (arr, mes) => (arr.find(r=>r.mes===mes)||{monto:0}).monto;
-
-  // Operativo = honorarios de campo (antes "Sebastián")
-  // Administrativo = honorarios de gestión (antes "Elías")
-  // Gastos Indirectos = cuenta Montichely (Banamex) + pagos directos en efectivo
-  const dOperativo        = allMonths.map(m => getMonto(INDIRECTOS.sebastian, m));
-  const dAdministrativo   = allMonths.map(m => getMonto(INDIRECTOS.elias, m));
-  const dGastosIndirectos = allMonths.map(m => getMonto(INDIRECTOS.montichely, m) + (efByMes[m]||0));
-
-  makeChart('chartIndMensual','bar', meses,
-    [
-      {label:'Operativo',         data:dOperativo,        backgroundColor:'#0369a133', borderColor:'#0369a1', borderWidth:1, borderRadius:3},
-      {label:'Administrativo',    data:dAdministrativo,   backgroundColor:'#4d7c0f33', borderColor:'#4d7c0f', borderWidth:1, borderRadius:3},
-      {label:'Gastos Indirectos', data:dGastosIndirectos, backgroundColor:'#c27a0933', borderColor:'#c27a09', borderWidth:1, borderRadius:3},
-    ],
-    {
-      plugins:{legend:{labels:{color:'#7a9485',font:{size:11},boxWidth:10}}},
-      scales:{
-        x:{stacked:true, ticks:{color:'#7a9485',font:{size:10}}, grid:{color:'#d0e4d833'}},
-        y:{stacked:true, ticks:{color:'#7a9485',font:{size:10},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'#d0e4d844'}}
-      }
-    }
-  );
-
-  // Totales dinámicos (evita valores fijos desactualizados)
-  const montichelyTotal = INDIRECTOS.montichely.reduce((s,r)=>s+r.monto,0);
-  const sebastianTotal  = INDIRECTOS.sebastian.reduce((s,r)=>s+r.monto,0);
-  const eliasTotal       = INDIRECTOS.elias.reduce((s,r)=>s+r.monto,0);
-
-  makeChart('chartIndCategoria','doughnut',
-    ['Operativo','Administrativo','Gastos Indirectos (Banamex)','Mant. Maquinaria','Maquinaria Rentada','Energía','Varios'],
-    [{
-      data:[sebastianTotal, eliasTotal, montichelyTotal,
-        INDIRECTOS.efectivo.filter(e=>e.cat==='Mant. Maquinaria').reduce((s,e)=>s+e.monto,0),
-        INDIRECTOS.efectivo.filter(e=>e.cat==='Maquinaria Rentada').reduce((s,e)=>s+e.monto,0),
-        INDIRECTOS.efectivo.filter(e=>e.cat==='Energía').reduce((s,e)=>s+e.monto,0),
-        INDIRECTOS.efectivo.filter(e=>e.cat==='Varios').reduce((s,e)=>s+e.monto,0)
-      ],
-      backgroundColor:['#0369a133','#4d7c0f33','#c27a0933','#6d28d933','#0e7a7033','#d9770633','#b91c1c33'],
-      borderColor:    ['#0369a1','#4d7c0f','#c27a09','#6d28d9','#0e7a70','#d97706','#b91c1c'], borderWidth:2
-    }],
-    {plugins:{legend:{position:'bottom',labels:{color:'#7a9485',font:{size:10},boxWidth:10}}}}
-  );
+function renderSembParams(){
+  document.getElementById("note-semb").style.display = (sembTipo === "maiz") ? "block" : "none";
+  renderParamRows("params-semb", "in-semb", getSembLabels(sembTipo), sembVal, renderSembStrip);
 }
-
-/* ═══════════════════════════════════════════
-   MODAL DE CONFIGURACIÓN
-═══════════════════════════════════════════ */
-function openConfig() {
-  const modal = document.getElementById('configModal');
-  modal.style.display = 'flex';
-  const input = document.getElementById('sheetsUrlInput');
-  input.value = SHEETS_URL || '';
-  updateConfigStatus();
-  setTimeout(() => input.focus(), 100);
-}
-
-function closeConfig() {
-  document.getElementById('configModal').style.display = 'none';
-}
-
-// Cierra modal al hacer clic en el fondo
-document.addEventListener('click', e => {
-  const modal = document.getElementById('configModal');
-  if (e.target === modal) closeConfig();
-});
-
-function updateConfigStatus() {
-  const el = document.getElementById('configStatusText');
-  if (!el) return;
-  if (SHEETS_URL) {
-    const short = SHEETS_URL.length > 55 ? SHEETS_URL.slice(0, 52) + '…' : SHEETS_URL;
-    el.textContent = '✓ Configurado: ' + short;
-    el.style.color = '#15803d';
-    document.getElementById('configStatus').style.borderColor = '#86efac';
-    document.getElementById('configStatus').style.background = '#f0fdf4';
-  } else {
-    el.textContent = 'sin configurar — sincronización deshabilitada';
-    el.style.color = '#92400e';
-    document.getElementById('configStatus').style.borderColor = '#fcd34d';
-    document.getElementById('configStatus').style.background = '#fffbeb';
+function renderSembStrip(){
+  const { ancho, surcos, largo, abono, semilla } = sembVal;
+  const areaBase = ancho * surcos * largo * 2;
+  const semillaVuelta = areaBase * semilla / 10000;
+  const abonoVuelta = areaBase * abono / 10000;
+  const mode = SEED_FIELD[sembTipo].mode;
+  const strip = document.getElementById("strip-semb");
+  strip.innerHTML = "";
+  for(let n=1;n<=SEMB_N_VUELTAS;n++){
+    const semillaTotal = semillaVuelta*n;
+    const semillaDisplay = mode === "count" ? fmt(Math.round(semillaTotal),0) : fmt(semillaTotal,2);
+    const semillaUnit = mode === "count" ? "semillas" : "kg";
+    const abonoBoteRow = sembTipo === "maiz"
+      ? `<div class="metric"><div class="m-label">Abono por bote</div><div class="m-value">${fmt(abonoVuelta*n/4,1)} <small>kg</small></div></div>`
+      : "";
+    const card = document.createElement("div");
+    card.className = "vuelta-card";
+    card.innerHTML = `
+      <div class="vuelta-num">${n}<span>vta${n>1?"s":""}</span></div>
+      <div class="metric"><div class="m-label">Semilla</div><div class="m-value">${semillaDisplay} <small>${semillaUnit}</small></div></div>
+      <div class="metric"><div class="m-label">Abono</div><div class="m-value">${fmt(abonoVuelta*n,1)} <small>kg</small></div></div>
+      ${abonoBoteRow}
+      <div class="metric"><div class="m-label">Área</div><div class="m-value">${fmt(areaBase*n,0)} <small>m²</small></div></div>
+    `;
+    strip.appendChild(card);
   }
 }
 
-async function saveAndTest() {
-  const input = document.getElementById('sheetsUrlInput');
-  const url = (input.value || '').trim();
-  if (!url) { showStatus('Ingresa una URL antes de guardar', false); return; }
-  if (!url.startsWith('https://script.google.com')) {
-    showStatus('La URL debe comenzar con https://script.google.com', false); return;
-  }
-  SHEETS_URL = url;
-  localStorage.setItem('maiz2026_sheets_url', url);
-  updateConfigStatus();
-  closeConfig();
-  showStatus('URL guardada — probando conexión...', true);
-  await syncFromSheets();
-}
-
-function clearConfig() {
-  SHEETS_URL = '';
-  localStorage.removeItem('maiz2026_sheets_url');
-  document.getElementById('sheetsUrlInput').value = '';
-  updateConfigStatus();
-  showStatus('Configuración eliminada', true);
-}
-
-/* ═══════════════════════════════════════════
-   SYNC DESDE GOOGLE SHEETS
-═══════════════════════════════════════════ */
-async function syncFromSheets() {
-  if (!SHEETS_URL) {
-    openConfig();
-    return;
-  }
-
-  const btn = document.getElementById('syncBtn');
-  if (btn) { btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Sincronizando...'; btn.disabled = true; }
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-    const resp = await fetch(SHEETS_URL, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error);
-
-    let changes = 0;
-
-    // ── Raya ──────────────────────────────────────
-    if (data.raya && data.raya.length) {
-      data.raya.forEach(r => {
-        const idx = RAYA.findIndex(x => x.sem === r.semana);
-        if (idx >= 0 && r.cantidad > 0) {
-          RAYA[idx].cant   = r.cantidad;
-          RAYA[idx].real   = r.real;
-          if (r.fechas) RAYA[idx].fechas = r.fechas;
-          changes++;
-        }
-      });
-    }
-
-    // ── Indirectos mensuales ──────────────────────
-    if (data.indirectos_mensual) {
-      ['montichely','sebastian','elias'].forEach(key => {
-        const arr = data.indirectos_mensual[key];
-        if (!arr || !arr.length) return;
-        INDIRECTOS[key] = arr.map(r => ({
-          mes: r.mes, monto: r.monto, real: r.real
-        }));
-        changes++;
-      });
-    }
-
-    // ── Efectivo detalle ──────────────────────────
-    if (data.efectivo_detalle && data.efectivo_detalle.length) {
-      INDIRECTOS.efectivo = data.efectivo_detalle.map(e => ({
-        fecha: e.fecha, concepto: e.concepto, monto: e.monto, cat: e.cat
-      }));
-      changes++;
-    }
-
-    // ── Agrofer mensual → actualiza gráfica mensual ─
-    if (data.agrofer_mensual && data.agrofer_mensual.length) {
-      window._agroferMensualSheets = data.agrofer_mensual;
-      changes++;
-    }
-
-    // ── EazyGro recibido → actualiza KPI ─────────
-    if (data.eezygro_recibido && data.eezygro_recibido.total_usd > 0) {
-      const eg = data.eezygro_recibido;
-      const el = document.getElementById('kpi-eezygro');
-      if (el) el.textContent = Math.round(eg.total_mxn).toLocaleString('es-MX');
-      changes++;
-    }
-
-    // ── Refresca las vistas activas ───────────────
-    refreshAllViews();
-
-    document.getElementById('updateLabel').textContent =
-      'Sync: ' + (data.updated || new Date().toLocaleDateString('es-MX'));
-    showStatus('Sincronizado ✓  –  ' + changes + ' secciones actualizadas', true);
-
-  } catch (err) {
-    const msg = err.message || '';
-    if (msg.includes('fetch') || msg.includes('network') || msg.includes('CORS') || msg.includes('Failed')) {
-      showStatus('URL no válida o Apps Script no desplegado — abre ⚙️ para revisar', false);
-      setTimeout(() => openConfig(), 1200);
-    } else {
-      showStatus('Error: ' + msg, false);
-    }
-  } finally {
-    if (btn) {
-      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Sync Sheets';
-      btn.disabled = false;
-    }
-  }
-}
-
-function refreshAllViews() {
-  // Destruye y reinicia todas las gráficas del Resumen + Raya + Indirectos
-  ['chartMensual','chartCategoria','chartTopProds','chartTopFertilizantes','chartRaya',
-   'chartRayaDetalle','chartIndMensual','chartIndCategoria'].forEach(id => {
-    if (activeCharts[id]) { activeCharts[id].destroy(); delete activeCharts[id]; }
+/* ---------- NAVEGACIÓN PRINCIPAL ---------- */
+document.querySelectorAll(".main-tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".main-tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    document.getElementById(`panel-${tab}`).classList.add("active");
+    document.getElementById("app").className = `theme-${tab}`;
   });
-  // Resumen siempre visible al sincronizar
-  initResumenCharts();
-  renderRayaTable();
-  renderIndirectosTable();
-}
-
-/* ═══════════════════════════════════════════
-   COMPARATIVO CICLOS — 2025 vs 2026
-═══════════════════════════════════════════ */
-function renderComparativoTables() {
-  const cTbody = document.getElementById('conv2025Tbody');
-  if (cTbody) {
-    cTbody.innerHTML = COMPARATIVO.convencional2025.map(p => `
-      <tr>
-        <td style="font-size:13px;">${p.producto}</td>
-        <td class="num" style="font-size:12px;color:var(--text-dim);">${p.cant}</td>
-        <td class="num" style="font-size:13px;font-weight:600;">${fmt(p.costo)}</td>
-        <td class="num" style="font-size:12px;color:var(--text-dim);">${fmt(p.costoHa)}</td>
-      </tr>`).join('');
-  }
-
-  const eTbody = document.getElementById('eezy2026CompTbody');
-  if (eTbody) {
-    eTbody.innerHTML = COMPARATIVO.eezygro2026.map(p => `
-      <tr>
-        <td style="font-size:13px;">${p.producto}</td>
-        <td class="num" style="font-size:12px;color:var(--text-dim);">${p.cant}</td>
-        <td class="num" style="font-size:13px;font-weight:600;">${fmt(p.costo)}</td>
-        <td class="num" style="font-size:12px;color:var(--text-dim);">${fmt(p.costoHa)}</td>
-      </tr>`).join('');
-  }
-}
-
-function initComparativoCharts() {
-  const TC_DIM = '#7a9485';
-  const TC_GRID = '#d0e4d833';
-
-  // Comparativo de costo total por rubro — 2025 cerrado vs 2026 real a la fecha
-  makeChart('chartTotalCiclos', 'bar',
-    ['Agrofer', 'EazyGro', 'Mano de obra (Raya)', 'Indirectos'],
-    [
-      { label: '2025 cerrado (71 ha)',        data: [2471745, 0, 554762, 2483183], backgroundColor: '#b91c1c33', borderColor: '#b91c1c', borderWidth: 1, borderRadius: 4 },
-      { label: `2026 real a la fecha (${HA} ha)`, data: [TOTAL_AGROFER_REAL, TOTAL_EAZYGRO_REAL, TOTAL_RAYA_REAL, TOTAL_INDIRECTOS_REAL], backgroundColor: '#c27a0933', borderColor: '#c27a09', borderWidth: 1, borderRadius: 4 }
-    ],
-    {
-      plugins: { legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } },
-      scales: {
-        x: { ticks: { color: TC_DIM, font: { size: 11 } }, grid: { color: TC_GRID } },
-        y: { ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#d0e4d844' } }
-      }
-    }
-  );
-
-  // Totales y costo/ha lado a lado
-  makeChart('chartCompTotales', 'bar',
-    ['Costo total (MXN)', 'Costo / ha (MXN)'],
-    [
-      { label: 'Convencional 2025', data: [2107364, 29681], backgroundColor: '#b91c1c33', borderColor: '#b91c1c', borderWidth: 1, borderRadius: 4 },
-      { label: 'EazyGro 2026',      data: [1290229, 18172], backgroundColor: '#15803d33', borderColor: '#15803d', borderWidth: 1, borderRadius: 4 }
-    ],
-    {
-      plugins: { legend: { labels: { color: TC_DIM, font: { size: 11 }, boxWidth: 10 } } },
-      scales: {
-        x: { ticks: { color: TC_DIM, font: { size: 11 } }, grid: { color: TC_GRID } },
-        y: { type: 'logarithmic', ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+Number(v).toLocaleString('es-MX') }, grid: { color: '#d0e4d844' } }
-      }
-    }
-  );
-
-  // Composición — top 5 de cada programa
-  const top5Conv = [...COMPARATIVO.convencional2025].sort((a,b)=>b.costo-a.costo).slice(0,5);
-  const top5Eezy = [...COMPARATIVO.eezygro2026].sort((a,b)=>b.costo-a.costo).slice(0,5);
-
-  makeChart('chartCompComposicion', 'bar',
-    [...top5Conv.map(p=>p.producto.slice(0,18)), ...top5Eezy.map(p=>p.producto.slice(0,18))],
-    [{
-      label: 'Costo MXN',
-      data: [...top5Conv.map(p=>p.costo), ...top5Eezy.map(p=>p.costo)],
-      backgroundColor: [...top5Conv.map(()=>'#b91c1c33'), ...top5Eezy.map(()=>'#15803d33')],
-      borderColor: [...top5Conv.map(()=>'#b91c1c'), ...top5Eezy.map(()=>'#15803d')],
-      borderWidth: 1, borderRadius: 3, indexAxis: 'y'
-    }],
-    {
-      indexAxis: 'y',
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: TC_DIM, font:{size:10}, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: TC_GRID } },
-        y: { ticks: { color: '#14291e', font: { size: 10 } }, grid: { display: false } }
-      }
-    }
-  );
-}
-
-/* ═══════════════════════════════════════════
-   GASTOS INDIRECTOS 2025 (MONTICHELY)
-═══════════════════════════════════════════ */
-function renderIndirectos2025Tables() {
-  const total2025 = INDIRECTOS_2025.porCategoria.reduce((s,c)=>s+c.monto,0);
-
-  const catTbody = document.getElementById('ind2025CatTbody');
-  if (catTbody) {
-    catTbody.innerHTML = [...INDIRECTOS_2025.porCategoria].sort((a,b)=>b.monto-a.monto).map(c => `
-      <tr>
-        <td style="font-size:13px;">${c.cat}</td>
-        <td class="num" style="font-size:13px;font-weight:600;">${fmt(c.monto)}</td>
-        <td class="num" style="font-size:12px;color:var(--text-dim);">${(c.monto/total2025*100).toFixed(1)}%</td>
-      </tr>`).join('');
-  }
-
-  const mesTbody = document.getElementById('ind2025MesTbody');
-  if (mesTbody) {
-    mesTbody.innerHTML = INDIRECTOS_2025.porMes.map(m => `
-      <tr>
-        <td style="font-size:13px;">${m.mes}</td>
-        <td class="num" style="font-size:13px;font-weight:600;${m.monto===0?'color:var(--text-dim);':''}">${fmt(m.monto)}</td>
-        <td style="font-size:11px;color:${m.nota?'#92400e':'var(--text-dim)'};">${m.nota || ''}</td>
-      </tr>`).join('');
-  }
-}
-
-function initIndirectos2025Charts() {
-  const TC_DIM = '#7a9485';
-  const TC_GRID = '#d0e4d833';
-  const sorted = [...INDIRECTOS_2025.porCategoria].sort((a,b)=>b.monto-a.monto);
-  const palette = ['#b91c1c','#c2410c','#c27a09','#a16207','#65a30d','#15803d','#0e7a70','#0369a1','#1d4ed8','#6d28d9','#a21caf','#be185d','#7a7a7a','#525252','#374151'];
-
-  makeChart('chartInd2025Categoria', 'doughnut',
-    sorted.map(c=>c.cat),
-    [{
-      data: sorted.map(c=>c.monto),
-      backgroundColor: palette.map(c=>c+'55'),
-      borderColor: palette, borderWidth: 1
-    }],
-    { plugins: { legend: { position: 'right', labels: { color: TC_DIM, font: { size: 9 }, boxWidth: 8 } } } }
-  );
-
-  makeChart('chartInd2025Mensual', 'bar',
-    INDIRECTOS_2025.porMes.map(m=>m.mes.slice(0,3)),
-    [{
-      label: 'Gasto mensual MXN',
-      data: INDIRECTOS_2025.porMes.map(m=>m.monto),
-      backgroundColor: INDIRECTOS_2025.porMes.map(m=> m.nota && m.monto>0 ? '#c27a0955' : '#0369a155'),
-      borderColor: INDIRECTOS_2025.porMes.map(m=> m.nota && m.monto>0 ? '#c27a09' : '#0369a1'),
-      borderWidth: 1, borderRadius: 4
-    }],
-    {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: TC_DIM, font: { size: 10 } }, grid: { color: TC_GRID } },
-        y: { ticks: { color: TC_DIM, font: { size: 10 }, callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#d0e4d844' } }
-      }
-    }
-  );
-}
-
-/* ═══════════════════════════════════════════
-   HECTAREAS EDITABLES -- recalculo en vivo
-═══════════════════════════════════════════ */
-function fmt0(n) { return Math.round(n).toLocaleString('es-MX'); }
-
-function recalcHA() {
-  const input = document.getElementById('haInput');
-  if (input) input.value = HA;
-
-  const costoHa   = TOTAL_PROYECTADO / HA;
-  const totalT    = HA * 18;
-  const costoTon  = TOTAL_PROYECTADO / totalT;
-  const gastadoHa = TOTAL_GASTADO / HA;
-  const pctGastado = (TOTAL_GASTADO / TOTAL_PROYECTADO) * 100;
-  const diffHa  = costoHa - COSTO_HA_2025;
-  const diffPct = (diffHa / COSTO_HA_2025) * 100;
-
-  const progUsdPerHa = EEZYGRO.reduce((s, p) => s + p.lt_ha * p.precio_usd, 0);
-  const progUsd = progUsdPerHa * HA;
-  const progMxn = progUsd * TC;
-
-  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-  ['haLabel1','haLabel2','haLabel3','haLabel4','haLabel5','haLabel6'].forEach(id => setText(id, HA));
-
-  setText('kpiCostoHaValue', '$' + fmt0(costoHa));
-  setText('kpiCostoTonValue', '$' + fmt0(costoTon));
-  setText('kpiTotalT', fmt0(totalT));
-  setText('kpiTotalReal', '$' + fmt0(TOTAL_GASTADO));
-  setText('kpiTotalRealNote', `Directos $${fmt0(TOTAL_AGROFER_REAL + TOTAL_EAZYGRO_REAL + TOTAL_RAYA_REAL)} + Indirectos $${fmt0(TOTAL_INDIRECTOS_REAL)}`);
-  setText('kpi-agrofer', fmt0(TOTAL_AGROFER_REAL));
-  setText('totalGastadoBanner', '$' + fmt0(TOTAL_GASTADO));
-  setText('totalGastadoBannerNote', `Agrofer $${fmt0(TOTAL_AGROFER_REAL)} · EazyGro $${fmt0(TOTAL_EAZYGRO_REAL)} · Raya $${fmt0(TOTAL_RAYA_REAL)} · Indirectos $${fmt0(TOTAL_INDIRECTOS_REAL)}`);
-  setText('bannerPct', pctGastado.toFixed(1) + '%');
-  setText('bannerGastadoHa', '$' + fmt0(gastadoHa));
-  setText('bannerGastadoHaNote', 'de $' + fmt0(costoHa) + ' estimado');
-  setText('kpiProgramaUsd', 'USD $' + fmt0(progUsd));
-  setText('kpiProgramaMxn', 'MXN $' + fmt0(progMxn));
-  setText('thHaUsd', `Total ${HA} ha USD`);
-  setText('thHaMxn', `Total ${HA} ha MXN`);
-  setText('chartEezyGroTitle', `Costo por producto – programa completo ${HA} ha (MXN)`);
-  setText('costoHaFooterReal', '$' + fmt0(TOTAL_GASTADO));
-  setText('costoHaFooterHaValue', '$' + fmt0(costoHa));
-  setText('beTotalT', fmt0(totalT) + ' t');
-  setText('beCostoTon', '$' + fmt0(costoTon) + '/t');
-  setText('beCostoTonNote', `$${fmt0(TOTAL_PROYECTADO)} / ${fmt0(totalT)} t (con indirectos)`);
-  setText('compRealValue', '$' + fmt0(TOTAL_GASTADO));
-  setText('compRealHaNote', `$${fmt0(gastadoHa)}/ha · ${HA} ha · semana 24/52`);
-  setText('compProyHaNote', `$${fmt0(costoHa)}/ha · fuente: Global Maíz 26`);
-  setText('compDiffPct', diffPct.toFixed(1) + '%');
-  setText('compDiffHa', (diffHa < 0 ? '-' : '+') + '$' + fmt0(Math.abs(diffHa)) + '/ha');
-
-  const agroferHa     = TOTAL_AGROFER_REAL / HA;
-  const eazygroHa     = TOTAL_EAZYGRO_REAL / HA;
-  const rayaHa        = TOTAL_RAYA_REAL / HA;
-  const indirectosHa  = TOTAL_INDIRECTOS_REAL / HA;
-  const agroferPct    = Math.min(100, (TOTAL_AGROFER_REAL / AGROFER_PRESUPUESTO_EST) * 100);
-
-  setText('agroferProgPct', agroferPct.toFixed(0) + '%');
-  const fillEl = document.getElementById('agroferProgFill');
-  if (fillEl) fillEl.style.width = agroferPct.toFixed(0) + '%';
-  setText('agroferProgNote', `$${fmt0(TOTAL_AGROFER_REAL)} / ~$${fmt0(AGROFER_PRESUPUESTO_EST)} est.`);
-
-  setText('cmpAgrofer2026', '$' + fmt0(TOTAL_AGROFER_REAL));
-  setText('cmpAgroferHa2026', '$' + fmt0(agroferHa));
-  setText('cmpEazyGroHa2026', '$' + fmt0(eazygroHa));
-  setText('cmpRayaHa2026', '$' + fmt0(rayaHa));
-  setText('cmpIndirectosHa2026', '$' + fmt0(indirectosHa));
-  setText('cmpTablaTotal2026', '$' + fmt0(TOTAL_GASTADO));
-  setText('cmpTablaTotalHa2026', '$' + fmt0(gastadoHa));
-
-  renderEezyGroTable();
-  if (activeCharts['chartEezyGro']) initEezyGroChart();
-  if (activeCharts['chartTotalCiclos']) initComparativoCharts();
-}
-
-function updateHA(val) {
-  const n = parseFloat(val);
-  if (!n || n <= 0) {
-    showStatus('Ingresa un número de hectáreas válido', false);
-    recalcHA();
-    return;
-  }
-  HA = n;
-  localStorage.setItem('maiz2026_ha', String(n));
-  recalcHA();
-  showStatus('Hectáreas actualizadas a ' + n + ' ha', true);
-}
-
-/* ═══════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════ */
-// Inyecta la animación de rotación para el spinner del botón Sync
-const _spinStyle = document.createElement('style');
-_spinStyle.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
-document.head.appendChild(_spinStyle);
-
-document.addEventListener('DOMContentLoaded', () => {
-  initResumenCharts();
-  renderFacturasTable(FACTURAS);
-  renderEezyGroTable();
-  renderRayaTable();
-  updateConfigStatus();
-  recalcHA();
-  // Auto-sync si ya hay URL guardada
-  if (SHEETS_URL) syncFromSheets();
 });
+
+/* ---------- SELECTORES DE SUBTIPO ---------- */
+document.querySelectorAll('.seg-btn[data-group="fert"]').forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll('.seg-btn[data-group="fert"]').forEach(b=>{b.classList.remove("active");b.setAttribute("aria-selected","false");});
+    btn.classList.add("active"); btn.setAttribute("aria-selected","true");
+    fertTipo = btn.dataset.tipo;
+    fertVal = { ...fertDEFAULTS[fertTipo] };
+    renderFertParams(); renderFertStrip();
+  });
+});
+document.querySelectorAll('.seg-btn[data-group="fum"]').forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll('.seg-btn[data-group="fum"]').forEach(b=>{b.classList.remove("active");b.setAttribute("aria-selected","false");});
+    btn.classList.add("active"); btn.setAttribute("aria-selected","true");
+    fumTipo = btn.dataset.tipo;
+    fumVal = { ...fumDEFAULTS[fumTipo] };
+    renderFumParams(); renderFumResults();
+  });
+});
+document.querySelectorAll('.seg-btn[data-group="semb"]').forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll('.seg-btn[data-group="semb"]').forEach(b=>{b.classList.remove("active");b.setAttribute("aria-selected","false");});
+    btn.classList.add("active"); btn.setAttribute("aria-selected","true");
+    sembTipo = btn.dataset.tipo;
+    sembVal = { ...sembDEFAULTS[sembTipo] };
+    renderSembParams(); renderSembStrip();
+  });
+});
+
+/* ---------- RESTABLECER ---------- */
+document.querySelectorAll(".reset-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const g = btn.dataset.group;
+    if(g === "fert"){ fertVal = { ...fertDEFAULTS[fertTipo] }; renderFertParams(); renderFertStrip(); }
+    else if(g === "fum"){ fumVal = { ...fumDEFAULTS[fumTipo] }; renderFumParams(); renderFumResults(); }
+    else if(g === "semb"){ sembVal = { ...sembDEFAULTS[sembTipo] }; renderSembParams(); renderSembStrip(); }
+  });
+});
+
+/* ---------- INICIO ---------- */
+renderFertParams(); renderFertStrip();
+renderFumParams(); renderFumResults();
+renderSembParams(); renderSembStrip();
 </script>
 </body>
 </html>
