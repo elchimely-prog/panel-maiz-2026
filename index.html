@@ -212,7 +212,7 @@ section.active{display:block}
 
   <div class="sh">EazyGro — fertilización líquida (programa completo · 80 ha)</div>
   <div class="ps">
-    <div class="pt2">EazyGro · 3 entregas · USD $61,818.60 · TC DOF 17.3688</div>
+    <div class="pt2">EazyGro · 4 entregas · USD $74,194.60 · TC DOF 17.3688</div>
     <div id="bfertEezy"></div>
   </div>
 </section>
@@ -378,7 +378,7 @@ const TC   = 17.39;
 let HA     = parseFloat(localStorage.getItem('maiz2026_ha')) || 80;
 
 let TOTAL_AGROFER_REAL    = 1511477;
-let TOTAL_EAZYGRO_REAL    = 1290244;
+let TOTAL_EAZYGRO_REAL    = 1288671;   // USD 74,194.60 × TC DOF 17.3688 · 4 folios (4540, 4546, 4547, 3093)
 let TOTAL_RAYA_REAL       = 277015;
 let TOTAL_INDIRECTOS_REAL = 1047838;
 const TOTAL_PROYECTADO    = 4311571.36;
@@ -439,9 +439,10 @@ const PROD_FERTIL_AGROFER = [
 
 // EazyGro — productos reales recibidos (fuente: Relación EezyGro · TC 17.39)
 const EEZYGRO_REAL = [
-  // Fuente: Relación de Fertilizantes EazyGro · TC DOF 17.3688 · 3 folios
-  {nombre:'EZ-N21',                     usd:11856,   mxn:205924},
-  {nombre:'Eezy One',                    usd:12896,   mxn:223988},
+  // Fuente: Relación de Fertilizantes EazyGro (archivo corregido) · TC DOF 17.3688
+  // 4 folios: 4540 (8-may), 4546 (22-may), 4547 (22-may), 3093 (10-jun)
+  {nombre:'EZ-N21',                     usd:17784,   mxn:308887},
+  {nombre:'Eezy One',                    usd:19344,   mxn:335982},
   {nombre:'Eezy Gro 24K',               usd:9500,    mxn:165004},
   {nombre:'Eezy Gro 9-18-9',           usd:8330.4,  mxn:144689},
   {nombre:'Paquete Nutricional Premium', usd:7885,    mxn:136953},
@@ -842,7 +843,7 @@ async function sync(){
       const i=RAYA.findIndex(w=>w.semana===r.semana);
       if(i>=0){RAYA[i].cant=r.cantidad;RAYA[i].real=r.real;if(r.fechas)RAYA[i].fechas=r.fechas;}
     });
-    if(d.eezygro_recibido?.total_mxn>0) TOTAL_EAZYGRO_REAL=d.eezygro_recibido.total_mxn;
+    // EazyGro no se actualiza desde Sync — programa completo, valor verificado en archivo oficial
     if(d.agrofer_mensual?.length) TOTAL_AGROFER_REAL=d.agrofer_mensual.reduce((s,r)=>s+(r.monto||0),0);
     if(d.indirectos_mensual){
       ['montichely','sebastian','elias'].forEach(k=>{
